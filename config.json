@@ -29,6 +29,9 @@
     { "id": 8, "name": "上海 上海电信", "province": "上海", "city": "上海", "isp": "电信" },
     { "id": 9, "name": "上海 上海联通", "province": "上海", "city": "上海", "isp": "联通" }
   ],
+  "selection": {
+    "prefer_multicast": true
+  },
   "validation": {
     "enable_stream_probe": false,
     "probe_channels_count": 3,

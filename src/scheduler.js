@@ -1,3 +1,8 @@
+/**
+ * scheduler.js
+ * 负责主调度循环：每日定时筛选、任务锁定、状态更新、通知派发与内置 HTTP 服务启停
+ */
+
 const fs = require('fs');
 const path = require('path');
 const IptvClient = require('./client');
@@ -30,6 +35,9 @@ class IptvScheduler {
     return JSON.parse(content);
   }
 
+  /**
+   * 启动调度器与 HTTP 服务
+   */
   async start() {
     console.log('====================================================');
     console.log('🚀 IPTV 自动化筛选与固定 M3U 订阅服务启动中...');
@@ -37,6 +45,7 @@ class IptvScheduler {
     console.log(`📢 Webhook: ${this.notifier.getMaskedUrl()}`);
     console.log('====================================================');
 
+    // 1. 启动 HTTP 订阅服务
     try {
       const serverInfo = await this.server.start();
       console.log(`📺 M3U 固定订阅服务已就绪: http://0.0.0.0:${serverInfo.port}${this.config.server.m3u_route}`);
@@ -45,14 +54,19 @@ class IptvScheduler {
       console.error(`❌ 启动 HTTP 订阅服务失败: ${err.message}`);
     }
 
+    // 2. 检查首次启动执行
     if (this.config.schedule.run_on_startup) {
       console.log('⚡ 配置了首次启动立即执行，正在触发首轮筛选...');
       await this.runJob('startup');
     }
 
+    // 3. 安排下一次每日定时调度
     this._scheduleNextRun();
   }
 
+  /**
+   * 计算距离下一次每日目标时间（如 17:00）的毫秒数
+   */
   _scheduleNextRun() {
     if (this.timer) clearTimeout(this.timer);
 
@@ -60,13 +74,16 @@ class IptvScheduler {
       .split(':')
       .map(n => parseInt(n, 10));
 
+    // 使用北京时间计算
     const now = new Date();
+    // 转为 UTC 时间戳然后偏移 +8 小时
     const beijingOffsetMs = 8 * 60 * 60 * 1000;
     const beijingTime = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + beijingOffsetMs);
 
     const targetDate = new Date(beijingTime);
     targetDate.setHours(targetHour, targetMinute, 0, 0);
 
+    // 如果今天的目标时间已经过去，则排在明天
     if (targetDate <= beijingTime) {
       targetDate.setDate(targetDate.getDate() + 1);
     }
@@ -81,18 +98,25 @@ class IptvScheduler {
     }, delayMs);
   }
 
+  /**
+   * 停止调度器与服务
+   */
   async stop() {
     if (this.timer) clearTimeout(this.timer);
     await this.server.stop();
     console.log('🛑 IPTV 调度服务已停止。');
   }
 
+  /**
+   * 执行单次筛选任务
+   */
   async runJob(triggerReason = 'manual') {
     if (this.isRunning) {
       console.log('⚠️ 当前已有正在执行的筛选任务，本次请求跳过。');
       return { skipped: true, reason: 'task_already_running' };
     }
 
+    // 并发文件锁保护
     if (!this.storage.acquireLock()) {
       console.log('⚠️ 检测到其他进程正在执行筛选任务 (task.lock)，跳过本次执行。');
       return { skipped: true, reason: 'locked' };
@@ -111,7 +135,8 @@ class IptvScheduler {
         this.validator,
         this.config.priorities,
         lastSource,
-        console.log
+        console.log,
+        this.config.selection || {}
       );
 
       if (!result) {
@@ -121,12 +146,14 @@ class IptvScheduler {
       const fixedUrl = `http://localhost:${this.config.server.port}${this.config.server.m3u_route}`;
 
       if (result.isRetained) {
+        // 沿用旧源
         console.log(`✅ 成功沿用现有可用源: ${result.source.type} (${result.source.ip})`);
         const currentState = this.storage.loadState();
         currentState.last_run_time = new Date().toISOString();
         currentState.last_error = null;
         this.storage.saveState(currentState);
 
+        // 发送通知（若配置）
         if (this.notifier.shouldNotify({ type: 'success', isRetained: true })) {
           await this.notifier.notifySuccess({
             source: result.source,
@@ -141,6 +168,7 @@ class IptvScheduler {
 
         return { success: true, isRetained: true, source: result.source };
       } else {
+        // 切换并写入新源
         console.log(`💾 正在原子更新 M3U 播放列表...`);
         const sourceMeta = {
           ip: result.source.ip,
@@ -158,8 +186,10 @@ class IptvScheduler {
         console.log(`✅ M3U 原子更新完成: ${updateResult.currentPath}`);
         console.log(`📁 备份历史快照: ${updateResult.historyBackup}`);
 
+        // 判断是否为新源发生变化
         const isSourceChanged = !lastSource || lastSource.ip !== result.source.ip;
 
+        // 发送成功通知
         if (this.notifier.shouldNotify({ type: 'success', isFirstSuccess, isSourceChanged, isRetained: false })) {
           const rawM3u = `https://iptv.cqshushu.com/index.php?s=${result.source.s}&t=${result.source.t}&channels=1&format=m3u`;
           await this.notifier.notifySuccess({
@@ -200,6 +230,7 @@ class IptvScheduler {
   }
 }
 
+// 支持直接作为脚本运行
 if (require.main === module) {
   const scheduler = new IptvScheduler();
   scheduler.start().catch((err) => {

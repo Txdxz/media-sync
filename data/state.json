@@ -1,22 +1,22 @@
 {
-  "last_run_time": "2026-10-12T18:41:56.513Z",
-  "last_success_time": "2026-10-08T11:02:57.231Z",
+  "last_run_time": "2026-10-13T16:46:03.613Z",
+  "last_success_time": "2026-10-13T16:46:03.613Z",
   "consecutive_failures": 0,
   "current_source": {
-    "ip": "221.213.23.189",
-    "p": "I6uMSwZ4xgNa--w9ML_CGQ",
-    "t": "hotel",
-    "s": "fpm4_v8wMYmuLJSovNFtcA",
-    "type": "山西太原酒店 山西联通",
-    "count": 103,
-    "status": "新上线",
-    "update_time": "2026-10-08 16:46:45",
+    "ip": "223.221.181.68",
+    "p": "FOKpHVfYtNQJV6kMjneSHA",
+    "t": "multicast",
+    "s": "JpaZtHtzivDdxhb_HJfqKg",
+    "type": "山西晋城组播 山西电信",
+    "count": 119,
+    "status": "存活1天",
+    "update_time": "2026-10-13 21:04:47",
     "tier": {
-      "id": 2,
-      "name": "山西太原 山西联通",
+      "id": 3,
+      "name": "山西其他城市电信",
       "province": "山西",
-      "city": "太原",
-      "isp": "联通"
+      "city_not": "太原",
+      "isp": "电信"
     }
   },
   "last_error": null

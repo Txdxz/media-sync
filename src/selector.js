@@ -3,6 +3,10 @@
  * 负责 IPTV 源的省份城市运营商解析、优先级档位匹配、排序及逐档筛选
  */
 
+const IptvClient = require('./client');
+const sleep = IptvClient.sleep || ((ms) => new Promise(res => setTimeout(res, ms)));
+const getRandomDelay = IptvClient.getRandomDelay || ((min, max) => Math.floor(Math.random() * (max - min + 1)) + min);
+
 // 山西省下辖地级市清单
 const SHANXI_CITIES = [
   '太原', '大同', '阳泉', '长治', '晋城', '朔州', '晋中', '运城', '忻州', '临汾', '吕梁'
@@ -197,7 +201,15 @@ function sortCandidates(candidates = []) {
  */
 async function selectOptimalSource(client, validator, prioritiesConfig, lastSelectedSource = null, logger = console.log, options = {}) {
   const preferMulticast = options.prefer_multicast !== false;
-  logger(`[Selector] 开始执行 IPTV 源自动化筛选 (组播源优先: ${preferMulticast ? '已开启' : '未开启'})...`);
+  const disableDelay = options.disable_delay !== undefined
+    ? options.disable_delay === true
+    : (process.env.NODE_ENV === 'test');
+  const pageDelayMinMs = options.page_delay_min_ms !== undefined ? options.page_delay_min_ms : 1500;
+  const pageDelayMaxMs = options.page_delay_max_ms !== undefined ? options.page_delay_max_ms : 3000;
+  const candidateDelayMinMs = options.candidate_delay_min_ms !== undefined ? options.candidate_delay_min_ms : 1000;
+  const candidateDelayMaxMs = options.candidate_delay_max_ms !== undefined ? options.candidate_delay_max_ms : 2000;
+
+  logger(`[Selector] 开始执行 IPTV 源自动化筛选 (组播源优先: ${preferMulticast ? '已开启' : '未开启'}, 模拟延时防风控: ${disableDelay ? '未启用' : '已启用'})...`);
 
   // 规则 3: 检查上期选中的源
   // 如果上期已选源本身就是组播源且依然存活，则立即停止当日筛选并沿用；
@@ -245,11 +257,21 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
     if (provinceCache.has(provinceCode)) {
       return provinceCache.get(provinceCode);
     }
+    if (provinceCache.size > 0 && !disableDelay) {
+      const delay = getRandomDelay(pageDelayMinMs, pageDelayMaxMs);
+      logger(`[Selector] 省份切换休眠 ${delay}ms (避开频率风控)...`);
+      await sleep(delay);
+    }
     let allSources = [];
     let currentPage = 1;
     let maxPages = 3;
     while (currentPage <= maxPages) {
       try {
+        if (currentPage > 1 && !disableDelay) {
+          const delay = getRandomDelay(pageDelayMinMs, pageDelayMaxMs);
+          logger(`[Selector] 翻页休眠 ${delay}ms (模拟真实间隔，避开频率风控)...`);
+          await sleep(delay);
+        }
         const listResult = await client.fetchSourceList({
           province: provinceCode,
           limit: 10,
@@ -326,6 +348,11 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
         logger(`[Selector] [P${tier.id} 组播] 匹配到 ${sorted.length} 个组播候选源，开始依次验证...`);
         for (let i = 0; i < sorted.length; i++) {
           const cand = sorted[i];
+          if (i > 0 && !disableDelay) {
+            const delay = getRandomDelay(candidateDelayMinMs, candidateDelayMaxMs);
+            logger(`[Selector] 候选源校验休眠 ${delay}ms (模拟点击间隔，避开频率风控)...`);
+            await sleep(delay);
+          }
           logger(`[Selector] [P${tier.id} 组播候选 ${i + 1}/${sorted.length}] 验证 IP=${cand.ip}, 状态=${cand.status}, 节目数=${cand.count}, 更新时间=${cand.update_time}`);
           const res = await testCandidate(cand, tier);
           if (res) return res;
@@ -362,6 +389,11 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
 
     for (let i = 0; i < sorted.length; i++) {
       const cand = sorted[i];
+      if (i > 0 && !disableDelay) {
+        const delay = getRandomDelay(candidateDelayMinMs, candidateDelayMaxMs);
+        logger(`[Selector] 候选源校验休眠 ${delay}ms (模拟点击间隔，避开频率风控)...`);
+        await sleep(delay);
+      }
       logger(`[Selector] [P${tier.id} 候选 ${i + 1}/${sorted.length}] 验证 IP=${cand.ip}, 状态=${cand.status}, 节目数=${cand.count}, 更新时间=${cand.update_time}`);
       const res = await testCandidate(cand, tier);
       if (res) return res;

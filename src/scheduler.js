@@ -136,7 +136,13 @@ class IptvScheduler {
         this.config.priorities,
         lastSource,
         console.log,
-        this.config.selection || {}
+        {
+          ...(this.config.selection || {}),
+          page_delay_min_ms: this.config.site && this.config.site.page_delay_min_ms,
+          page_delay_max_ms: this.config.site && this.config.site.page_delay_max_ms,
+          candidate_delay_min_ms: this.config.site && this.config.site.candidate_delay_min_ms,
+          candidate_delay_max_ms: this.config.site && this.config.site.candidate_delay_max_ms
+        }
       );
 
       if (!result) {

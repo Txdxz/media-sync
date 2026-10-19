@@ -1,8 +1,24 @@
+/**
+ * client.js
+ * 目标网站 cqshushu IPTV 接口客户端
+ * 采用原生 https 模块 + curl 自动回退机制，确保在各种沙箱、NAS 或代理环境中均能稳定请求
+ */
+
 const https = require('https');
 const http = require('http');
 const { execFile } = require('child_process');
 const { URL } = require('url');
 const { generatePaerToken } = require('./token');
+
+function sleep(ms) {
+  if (!ms || ms <= 0) return Promise.resolve();
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getRandomDelay(min, max) {
+  if (min >= max) return min;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 class IptvClient {
   constructor(config = {}) {
@@ -10,8 +26,15 @@ class IptvClient {
     this.indexPath = config.index_path || '/index.php';
     this.timeoutMs = config.request_timeout_ms || 15000;
     this.userAgent = config.user_agent || 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
+    this.rateLimitRetryCount = config.rate_limit_retry_count !== undefined ? config.rate_limit_retry_count : 2;
+    this.rateLimitRetryDelayMs = config.rate_limit_retry_delay_ms !== undefined ? config.rate_limit_retry_delay_ms : 5000;
+    this.logger = config.logger || console.log;
   }
 
+  /**
+   * 发起 HTTP/HTTPS 请求
+   * 优先尝试 Node.js 原生请求，若受沙箱限制无法解析 DNS 则无缝回退至系统 curl
+   */
   async _request(requestUrl, options = {}) {
     const parsedUrl = new URL(requestUrl, this.baseUrl);
     const token = generatePaerToken();
@@ -34,6 +57,9 @@ class IptvClient {
     }
   }
 
+  /**
+   * Node.js 原生 HTTP/HTTPS 请求
+   */
   _nativeRequest(parsedUrl, headers, options) {
     const isHttps = parsedUrl.protocol === 'https:';
     const requester = isHttps ? https : http;
@@ -74,6 +100,10 @@ class IptvClient {
     });
   }
 
+  /**
+   * curl 回退请求（适配部分受限沙箱环境）
+   * 使用 -w 获取 HTTP 状态码，避免代理环境产生多重 HTTP 响应头干扰 body 解析
+   */
   _curlRequest(targetUrl, headers, options) {
     return new Promise((resolve, reject) => {
       const statusMarker = '---HTTP_STATUS:';
@@ -112,6 +142,9 @@ class IptvClient {
     });
   }
 
+  /**
+   * 拉取指定省份与分页的源列表 (带频率限制自动退避重试机制)
+   */
   async fetchSourceList({ province = 'all', type = 'all', limit = 10, page = 1 } = {}) {
     const searchParams = new URLSearchParams({
       t: type,
@@ -121,30 +154,64 @@ class IptvClient {
     });
 
     const targetUrl = `${this.baseUrl}${this.indexPath}?${searchParams.toString()}`;
-    const response = await this._request(targetUrl, { isJson: true });
+    const maxAttempts = 1 + Math.max(0, this.rateLimitRetryCount);
+    let attempts = 0;
 
-    let data;
-    try {
-      data = JSON.parse(response.body);
-    } catch (e) {
-      throw new Error(`Failed to parse JSON list response: ${e.message}, body preview: ${response.body.substring(0, 150)}`);
+    while (attempts < maxAttempts) {
+      attempts++;
+      try {
+        const response = await this._request(targetUrl, { isJson: true });
+
+        let data;
+        try {
+          data = JSON.parse(response.body);
+        } catch (e) {
+          throw new Error(`Failed to parse JSON list response: ${e.message}, body preview: ${response.body.substring(0, 150)}`);
+        }
+
+        if (data.status !== 'success') {
+          const errMsg = data.message || data.status || 'unknown';
+          const isRateLimit = errMsg.includes('频繁') || errMsg.includes('稍后') || errMsg.includes('rate');
+          if (isRateLimit && attempts < maxAttempts) {
+            const jitter = getRandomDelay(500, 1500);
+            const waitTime = this.rateLimitRetryDelayMs * attempts + jitter;
+            if (this.logger) {
+              this.logger(`[Client] ⚠️ 触发网站频率限制【${errMsg}】，正在退避休眠 ${waitTime}ms 后重试 (第 ${attempts}/${maxAttempts - 1} 次重试)...`);
+            }
+            await sleep(waitTime);
+            continue;
+          }
+          throw new Error(`Site returned error status: ${errMsg}`);
+        }
+
+        const html = data.html || '';
+        const sources = this._parseTableRows(html);
+        const pagination = this._parsePagination(html, page);
+
+        return {
+          sources,
+          pagination,
+          title: data.title
+        };
+      } catch (err) {
+        const isRateLimit = err.message && (err.message.includes('频繁') || err.message.includes('429'));
+        if (isRateLimit && attempts < maxAttempts) {
+          const jitter = getRandomDelay(500, 1500);
+          const waitTime = this.rateLimitRetryDelayMs * attempts + jitter;
+          if (this.logger) {
+            this.logger(`[Client] ⚠️ 请求异常触发频率限制【${err.message}】，正在退避休眠 ${waitTime}ms 后重试 (第 ${attempts}/${maxAttempts - 1} 次重试)...`);
+          }
+          await sleep(waitTime);
+          continue;
+        }
+        throw err;
+      }
     }
-
-    if (data.status !== 'success') {
-      throw new Error(`Site returned error status: ${data.message || data.status || 'unknown'}`);
-    }
-
-    const html = data.html || '';
-    const sources = this._parseTableRows(html);
-    const pagination = this._parsePagination(html, page);
-
-    return {
-      sources,
-      pagination,
-      title: data.title
-    };
   }
 
+  /**
+   * 解析 HTML 表格行
+   */
   _parseTableRows(html) {
     const sources = [];
     const rows = html.match(/<tr[\s\S]*?<\/tr>/g) || [];
@@ -177,6 +244,9 @@ class IptvClient {
     return sources;
   }
 
+  /**
+   * 解析分页信息
+   */
   _parsePagination(html, currentPage) {
     const hasNextPage = html.includes('class="pagination-btn">下一页</a>') || html.includes(`page=${currentPage + 1}`);
     const pageMatches = html.match(/page=(\d+)/g) || [];
@@ -192,43 +262,86 @@ class IptvClient {
     };
   }
 
+  /**
+   * 拉取源详情，并提取 s 参数 (带频率限制自动退避重试机制)
+   */
   async fetchSourceDetail(p, t) {
     const targetUrl = `${this.baseUrl}${this.indexPath}?p=${encodeURIComponent(p)}&t=${encodeURIComponent(t)}`;
-    const response = await this._request(targetUrl, { isJson: true });
+    const maxAttempts = 1 + Math.max(0, this.rateLimitRetryCount);
+    let attempts = 0;
 
-    let data;
-    try {
-      data = JSON.parse(response.body);
-    } catch (e) {
-      throw new Error(`Failed to parse JSON detail response: ${e.message}`);
+    while (attempts < maxAttempts) {
+      attempts++;
+      try {
+        const response = await this._request(targetUrl, { isJson: true });
+
+        let data;
+        try {
+          data = JSON.parse(response.body);
+        } catch (e) {
+          throw new Error(`Failed to parse JSON detail response: ${e.message}`);
+        }
+
+        if (data.status !== 'success' && data.message) {
+          const errMsg = data.message;
+          const isRateLimit = errMsg.includes('频繁') || errMsg.includes('稍后') || errMsg.includes('rate');
+          if (isRateLimit && attempts < maxAttempts) {
+            const jitter = getRandomDelay(500, 1500);
+            const waitTime = this.rateLimitRetryDelayMs * attempts + jitter;
+            if (this.logger) {
+              this.logger(`[Client] ⚠️ 获取源详情触发频率限制【${errMsg}】，正在退避休眠 ${waitTime}ms 后重试 (第 ${attempts}/${maxAttempts - 1} 次重试)...`);
+            }
+            await sleep(waitTime);
+            continue;
+          }
+        }
+
+        const html = data.html || '';
+        const match = html.match(/\?s=([^&'"]+)&t=([^&'"]+)/);
+        if (!match) {
+          throw new Error(`Channel list parameter 's' not found in detail page for p=${p}`);
+        }
+
+        const sParam = match[1];
+        const tParam = match[2];
+
+        const statusMatch = html.match(/<span class=["']status-badge[^"']*["']>\s*([^<]+?)\s*<\/span>/);
+        const status = statusMatch ? statusMatch[1].trim() : null;
+
+        return {
+          s: sParam,
+          t: tParam,
+          status,
+          html
+        };
+      } catch (err) {
+        const isRateLimit = err.message && (err.message.includes('频繁') || err.message.includes('429'));
+        if (isRateLimit && attempts < maxAttempts) {
+          const jitter = getRandomDelay(500, 1500);
+          const waitTime = this.rateLimitRetryDelayMs * attempts + jitter;
+          if (this.logger) {
+            this.logger(`[Client] ⚠️ 获取源详情异常触发频率限制【${err.message}】，正在退避休眠 ${waitTime}ms 后重试...`);
+          }
+          await sleep(waitTime);
+          continue;
+        }
+        throw err;
+      }
     }
-
-    const html = data.html || '';
-    const match = html.match(/\?s=([^&'"]+)&t=([^&'"]+)/);
-    if (!match) {
-      throw new Error(`Channel list parameter 's' not found in detail page for p=${p}`);
-    }
-
-    const sParam = match[1];
-    const tParam = match[2];
-
-    const statusMatch = html.match(/<span class=["']status-badge[^"']*["']>\s*([^<]+?)\s*<\/span>/);
-    const status = statusMatch ? statusMatch[1].trim() : null;
-
-    return {
-      s: sParam,
-      t: tParam,
-      status,
-      html
-    };
   }
 
+  /**
+   * 直接下载指定源的完整 M3U 播放列表
+   */
   async fetchM3UContent(s, t) {
     const targetUrl = `${this.baseUrl}${this.indexPath}?s=${encodeURIComponent(s)}&t=${encodeURIComponent(t)}&channels=1&format=m3u`;
     const response = await this._request(targetUrl, { isJson: false });
     return response.body;
   }
 
+  /**
+   * 检查先前选中的源是否依然存活
+   */
   async checkSourceStillAlive(p, t) {
     try {
       const detail = await this.fetchSourceDetail(p, t);
@@ -241,5 +354,8 @@ class IptvClient {
     }
   }
 }
+
+IptvClient.sleep = sleep;
+IptvClient.getRandomDelay = getRandomDelay;
 
 module.exports = IptvClient;

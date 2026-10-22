@@ -1,23 +1,25 @@
 {
-  "last_run_time": "2026-10-21T14:22:48.541Z",
-  "last_success_time": "2026-10-18T13:03:10.970Z",
+  "last_run_time": "2026-10-22T11:19:51.962Z",
+  "last_success_time": "2026-10-22T11:19:51.962Z",
   "consecutive_failures": 0,
   "current_source": {
-    "ip": "111.179.83.244",
-    "p": "RGkmUm4AaYDEQUjYpnfeSw",
+    "ip": "123.247.81.124",
+    "p": "CUjnwQGooOIjCK-haAvkdQ",
     "t": "multicast",
-    "s": "5QeWS9p6wsyrIHeb7glHYw",
-    "type": "天津组播 天津联通",
-    "count": 160,
-    "status": "存活2天",
-    "update_time": "2026-10-18 19:26:15",
+    "s": "8E1t-gtKmpdBC02KQwydZA",
+    "type": "山西朔州组播 山西电信",
+    "count": 119,
+    "status": "存活4天",
+    "update_time": "2026-10-22 19:17:58",
     "tier": {
-      "id": 6,
-      "name": "天津 天津联通",
-      "province": "天津",
-      "city": "天津",
-      "isp": "联通"
-    }
+      "id": 3,
+      "name": "山西其他城市电信",
+      "province": "山西",
+      "city_not": "太原",
+      "isp": "电信"
+    },
+    "last_verified_at": "2026-10-22T11:19:51.962Z"
   },
-  "last_error": null
+  "last_error": null,
+  "last_check_time": "2026-10-22T11:19:51.962Z"
 }

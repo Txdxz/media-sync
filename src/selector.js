@@ -1,11 +1,11 @@
 /**
  * selector.js
- * 负责 IPTV 源的省份城市运营商解析、优先级档位匹配、排序及逐档筛选
+ * 负责订阅源的省份城市运营商解析、优先级档位匹配、排序及逐档筛选
  */
 
-const IptvClient = require('./client');
-const sleep = IptvClient.sleep || ((ms) => new Promise(res => setTimeout(res, ms)));
-const getRandomDelay = IptvClient.getRandomDelay || ((min, max) => Math.floor(Math.random() * (max - min + 1)) + min);
+const SourceClient = require('./client');
+const sleep = SourceClient.sleep || ((ms) => new Promise(res => setTimeout(res, ms)));
+const getRandomDelay = SourceClient.getRandomDelay || ((min, max) => Math.floor(Math.random() * (max - min + 1)) + min);
 
 // 山西省下辖地级市清单
 const SHANXI_CITIES = [
@@ -13,12 +13,18 @@ const SHANXI_CITIES = [
 ];
 
 // 各省份对应的网站查询代码
+// 注意：河南为 ha（hn 是湖南）、内蒙古为 nm，切勿按拼音首字母臆测
 const PROVINCE_TO_CODE = {
   '山西': 'sx',
   '天津': 'tj',
   '北京': 'bj',
   '上海': 'sh',
-  '陕西': 'sn'
+  '陕西': 'sn',
+  '河南': 'ha',
+  '吉林': 'jl',
+  '内蒙古': 'nm',
+  '江苏': 'js',
+  '安徽': 'ah'
 };
 
 /**
@@ -49,6 +55,16 @@ function parseSourceType(typeStr = '') {
   } else if (text.includes('重庆')) {
     province = '重庆';
     city = '重庆';
+  } else if (text.includes('河南')) {
+    province = '河南';
+  } else if (text.includes('吉林')) {
+    province = '吉林';
+  } else if (text.includes('内蒙古')) {
+    province = '内蒙古';
+  } else if (text.includes('江苏')) {
+    province = '江苏';
+  } else if (text.includes('安徽')) {
+    province = '安徽';
   }
 
   // 2. 判断城市（特别是山西省内各市）
@@ -192,7 +208,7 @@ function sortCandidates(candidates = []) {
 
 /**
  * 执行全流程选源
- * @param {object} client - IptvClient 实例
+ * @param {object} client - SourceClient 实例
  * @param {object} validator - M3U 验证器实例
  * @param {Array} prioritiesConfig - 优先级配置
  * @param {object|null} lastSelectedSource - 上一次选中的源元数据
@@ -201,6 +217,7 @@ function sortCandidates(candidates = []) {
  */
 async function selectOptimalSource(client, validator, prioritiesConfig, lastSelectedSource = null, logger = console.log, options = {}) {
   const preferMulticast = options.prefer_multicast !== false;
+  const upgradeProbe = options.upgrade_probe !== false;
   const disableDelay = options.disable_delay !== undefined
     ? options.disable_delay === true
     : (process.env.NODE_ENV === 'test');
@@ -209,42 +226,76 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
   const candidateDelayMinMs = options.candidate_delay_min_ms !== undefined ? options.candidate_delay_min_ms : 1000;
   const candidateDelayMaxMs = options.candidate_delay_max_ms !== undefined ? options.candidate_delay_max_ms : 2000;
 
-  logger(`[Selector] 开始执行 IPTV 源自动化筛选 (组播源优先: ${preferMulticast ? '已开启' : '未开启'}, 模拟延时防风控: ${disableDelay ? '未启用' : '已启用'})...`);
+  logger(`[Selector] 开始执行订阅源自动化筛选 (组播源优先: ${preferMulticast ? '已开启' : '未开启'}, 向上升级探测: ${upgradeProbe ? '已开启' : '未开启'}, 模拟延时防风控: ${disableDelay ? '未启用' : '已启用'})...`);
 
   // 规则 3: 检查上期选中的源
-  // 如果上期已选源本身就是组播源且依然存活，则立即停止当日筛选并沿用；
-  // 如果上期已选源为非组播源（如酒店源），但当前启用了组播优先规则，则先记录为备用，优先在各档位中搜寻可用的组播源进行升级
+  // - 上期为组播源且存活：不再无条件短路。默认先向上探测更高档位是否出现可用组播源，
+  //   有则升级，无则安全沿用（可通过 selection.upgrade_probe = false 关闭探测，恢复纯沿用）。
+  // - 上期为非组播源（如酒店源）且存活：记录为备用，优先在各档位中搜寻组播源进行升级。
   let survivingBackup = null;
+  // 阶段 1 只探测该索引之前的档位（用于上期组播源的向上升级探测）
+  let stage1TierLimit = prioritiesConfig.length;
+
+  function findTierIndex(source) {
+    if (source && source.tier && source.tier.id !== undefined) {
+      const idx = prioritiesConfig.findIndex(t => t.id === source.tier.id);
+      if (idx !== -1) return idx;
+    }
+    if (source && source.type) {
+      const matched = matchPriorityTier(parseSourceType(source.type), prioritiesConfig);
+      if (matched) {
+        return prioritiesConfig.findIndex(t => t.id === matched.id);
+      }
+    }
+    return -1;
+  }
 
   if (lastSelectedSource && lastSelectedSource.p && lastSelectedSource.t) {
     logger(`[Selector] 正在复检上次已选源: IP=${lastSelectedSource.ip}, P=${lastSelectedSource.p}, 类型=${lastSelectedSource.type || lastSelectedSource.t}`);
     const aliveCheck = await client.checkSourceStillAlive(lastSelectedSource.p, lastSelectedSource.t);
     if (aliveCheck && aliveCheck.isAlive) {
       const isLastMulti = isMulticastSource(lastSelectedSource);
-      if (!preferMulticast || isLastMulti) {
+      const retained = {
+        isRetained: true,
+        source: {
+          ...lastSelectedSource,
+          status: aliveCheck.status,
+          s: aliveCheck.s || lastSelectedSource.s
+        },
+        tier: lastSelectedSource.tier || { name: '上期优选源(沿用)' },
+        reason: `沿用上期存活源，网站状态为【${aliveCheck.status}】`
+      };
+
+      if (!preferMulticast) {
         logger(`[Selector] 上次选中的源当前状态依然存活 (${aliveCheck.status})，触发沿用机制，立即停止当日筛选。`);
-        return {
-          isRetained: true,
-          source: {
-            ...lastSelectedSource,
-            status: aliveCheck.status,
-            s: aliveCheck.s || lastSelectedSource.s
-          },
-          tier: lastSelectedSource.tier || { name: '上期优选源(沿用)' },
-          reason: `沿用上期存活源，网站状态为【${aliveCheck.status}】`
+        return retained;
+      }
+
+      if (isLastMulti && !upgradeProbe) {
+        logger(`[Selector] 上次选中的组播源依然存活 (${aliveCheck.status})，已关闭向上探测，直接沿用。`);
+        return retained;
+      }
+
+      if (isLastMulti) {
+        const lastTierIndex = findTierIndex(lastSelectedSource);
+        // 档位未知（历史状态缺失）时退化为全量探测，由「同一源」保护避免无意义重写
+        stage1TierLimit = lastTierIndex === -1 ? prioritiesConfig.length : lastTierIndex;
+        survivingBackup = {
+          ...retained,
+          reason: `未发现更高档位的可用组播源，平稳沿用上期存活源【${aliveCheck.status}】`
         };
+        if (stage1TierLimit === 0) {
+          logger(`[Selector] 上期组播源仍存活 (${aliveCheck.status}) 且已处于最高可用档位，直接沿用，无需向上探测。`);
+          return survivingBackup;
+        }
+        logger(`[Selector] 上期组播源仍存活 (${aliveCheck.status})，先向上探测更高档位是否存在更优组播源...`);
       } else {
         logger(`[Selector] 上期源仍存活 (${aliveCheck.status})，但为非组播源。依据【组播源优先】策略暂存为备用，优先在优先级档位中搜寻高稳定性组播源...`);
         survivingBackup = {
-          isRetained: true,
-          source: {
-            ...lastSelectedSource,
-            status: aliveCheck.status,
-            s: aliveCheck.s || lastSelectedSource.s
-          },
-          tier: lastSelectedSource.tier || { name: '上期优选源(沿用)' },
+          ...retained,
           reason: `未找到更优组播源，平稳回退沿用上期存活源【${aliveCheck.status}】`
         };
+        stage1TierLimit = prioritiesConfig.length;
       }
     } else {
       logger(`[Selector] 上次选中的源已失效或不可达 (${aliveCheck.status || aliveCheck.error || '失效'})，开始按优先级档位重新筛选。`);
@@ -331,10 +382,12 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
     return null;
   }
 
-  // 阶段 1: 若开启组播优先，按优先级档位 P1 到 P9 依次匹配组播源
+  // 阶段 1: 若开启组播优先，按优先级档位依次匹配组播源
+  // 上期组播源存活时只探测其之前的档位（stage1TierLimit），避免无意义地重复验证同一批低档位源
   if (preferMulticast) {
-    logger('[Selector] === 阶段 1: 优先级档位组播源定向巡检 ===');
-    for (const tier of prioritiesConfig) {
+    logger(`[Selector] === 阶段 1: 优先级档位组播源定向巡检 (探测前 ${stage1TierLimit}/${prioritiesConfig.length} 个档位) ===`);
+    for (let tierIdx = 0; tierIdx < stage1TierLimit; tierIdx++) {
+      const tier = prioritiesConfig[tierIdx];
       const provinceCode = PROVINCE_TO_CODE[tier.province] || 'all';
       const allSources = await fetchCandidatesForProvince(provinceCode);
       const multicastCandidates = allSources.filter(src => {
@@ -355,16 +408,23 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
           }
           logger(`[Selector] [P${tier.id} 组播候选 ${i + 1}/${sorted.length}] 验证 IP=${cand.ip}, 状态=${cand.status}, 节目数=${cand.count}, 更新时间=${cand.update_time}`);
           const res = await testCandidate(cand, tier);
-          if (res) return res;
+          if (res) {
+            // 向上探测若命中的仍是上期同一源，维持沿用，避免无意义重写
+            if (survivingBackup && lastSelectedSource && res.source.p === lastSelectedSource.p) {
+              logger('[Selector] 向上探测命中的仍是上期同一源，维持沿用，避免无意义重写。');
+              return survivingBackup;
+            }
+            return res;
+          }
         }
       }
     }
     logger('[Selector] 阶段 1 巡检结束，各优先级档位未找到立即可用的组播源。');
   }
 
-  // 若阶段 1 未能找到可用组播源，但上期非组播源依然存活，平稳回退沿用上期源
+  // 若阶段 1 未能找到可用组播源，但上期存活源（组播或非组播）依然可用，平稳回退沿用上期源
   if (survivingBackup) {
-    logger(`[Selector] 未找到新增可用组播源，平稳回退沿用上期仍存活的源: IP=${survivingBackup.source.ip} (${survivingBackup.source.type})`);
+    logger(`[Selector] 未找到更优组播源，平稳回退沿用上期仍存活的源: IP=${survivingBackup.source.ip} (${survivingBackup.source.type})`);
     return survivingBackup;
   }
 

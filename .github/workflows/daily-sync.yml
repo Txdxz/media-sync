@@ -49,8 +49,8 @@ jobs:
           SUBSCRIBE_KEY: ${{ secrets.SUBSCRIBE_KEY }}
         run: |
           mkdir -p ./public
-          # 若用户在 GitHub Secret 中配置了 SUBSCRIBE_KEY 则使用，否则回退到私有混淆后缀
-          KEY="${SUBSCRIBE_KEY:-feed_8a7c2e}"
+          # 必须由仓库 Secret 提供，禁止在代码中保留可预测的兜底后缀
+          KEY="${SUBSCRIBE_KEY:?SUBSCRIBE_KEY 未配置，已中止发布以保护订阅地址}"
           # 自动剔除可能误填的 .m3u 后缀，避免重复拼接为 .m3u.m3u
           CLEAN_KEY="${KEY%.m3u}"
           

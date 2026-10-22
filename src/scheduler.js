@@ -5,19 +5,19 @@
 
 const fs = require('fs');
 const path = require('path');
-const IptvClient = require('./client');
+const SourceClient = require('./client');
 const M3uValidator = require('./validator');
 const StorageManager = require('./storage');
 const Notifier = require('./notifier');
 const M3uServer = require('./server');
 const { selectOptimalSource } = require('./selector');
 
-class IptvScheduler {
+class SyncScheduler {
   constructor(configPath = path.resolve(__dirname, '../config.json')) {
     this.configPath = configPath;
     this.config = this._loadConfig();
 
-    this.client = new IptvClient(this.config.site);
+    this.client = new SourceClient(this.config.site);
     this.validator = new M3uValidator(this.config.validation);
     this.storage = new StorageManager(this.config.storage);
     this.notifier = new Notifier(this.config.notification);
@@ -40,7 +40,7 @@ class IptvScheduler {
    */
   async start() {
     console.log('====================================================');
-    console.log('🚀 IPTV 自动化筛选与固定 M3U 订阅服务启动中...');
+    console.log('🚀 订阅源自动化同步与固定订阅服务启动中...');
     console.log(`⏰ 定时计划: 每日北京时间 ${this.config.schedule.daily_time || '17:00'}`);
     console.log(`📢 Webhook: ${this.notifier.getMaskedUrl()}`);
     console.log('====================================================');
@@ -104,7 +104,7 @@ class IptvScheduler {
   async stop() {
     if (this.timer) clearTimeout(this.timer);
     await this.server.stop();
-    console.log('🛑 IPTV 调度服务已停止。');
+    console.log('🛑 调度服务已停止。');
   }
 
   /**
@@ -123,7 +123,7 @@ class IptvScheduler {
     }
 
     this.isRunning = true;
-    console.log(`\n▶️ 开始执行 IPTV 筛选任务 [触发来源: ${triggerReason}]...`);
+    console.log(`\n▶️ 开始执行订阅源筛选任务 [触发来源: ${triggerReason}]...`);
 
     const prevState = this.storage.loadState();
     const isFirstSuccess = !prevState.last_success_time;
@@ -146,18 +146,25 @@ class IptvScheduler {
       );
 
       if (!result) {
-        throw new Error('所有 9 档优先级均未能找到可用的 IPTV 源');
+        throw new Error(`所有 ${this.config.priorities.length} 个优先级档位均未能找到可用的订阅源`);
       }
 
       const fixedUrl = `http://localhost:${this.config.server.port}${this.config.server.m3u_route}`;
 
       if (result.isRetained) {
-        // 沿用旧源
+        // 沿用旧源：不重写订阅文件，但必须刷新源状态与最近检查时间
         console.log(`✅ 成功沿用现有可用源: ${result.source.type} (${result.source.ip})`);
-        const currentState = this.storage.loadState();
-        currentState.last_run_time = new Date().toISOString();
-        currentState.last_error = null;
-        this.storage.saveState(currentState);
+        this.storage.recordRetention({
+          ip: result.source.ip,
+          p: result.source.p,
+          t: result.source.t,
+          s: result.source.s,
+          type: result.source.type,
+          count: result.source.count,
+          status: result.source.status,
+          update_time: result.source.update_time,
+          tier: result.tier
+        });
 
         // 发送通知（若配置）
         if (this.notifier.shouldNotify({ type: 'success', isRetained: true })) {
@@ -167,7 +174,7 @@ class IptvScheduler {
             isRetained: true,
             reason: result.reason,
             fixedSubscribeUrl: fixedUrl,
-            rawM3uUrl: result.source.s ? `https://iptv.cqshushu.com/index.php?s=${result.source.s}&t=${result.source.t}&channels=1&format=m3u` : null,
+            rawM3uUrl: result.source.s ? `${this.config.site.base_url}${this.config.site.index_path}?s=${result.source.s}&t=${result.source.t}&channels=1&format=m3u` : null,
             channelCount: result.source.count
           });
         }
@@ -197,7 +204,7 @@ class IptvScheduler {
 
         // 发送成功通知
         if (this.notifier.shouldNotify({ type: 'success', isFirstSuccess, isSourceChanged, isRetained: false })) {
-          const rawM3u = `https://iptv.cqshushu.com/index.php?s=${result.source.s}&t=${result.source.t}&channels=1&format=m3u`;
+          const rawM3u = `${this.config.site.base_url}${this.config.site.index_path}?s=${result.source.s}&t=${result.source.t}&channels=1&format=m3u`;
           await this.notifier.notifySuccess({
             source: result.source,
             tier: result.tier,
@@ -238,7 +245,7 @@ class IptvScheduler {
 
 // 支持直接作为脚本运行
 if (require.main === module) {
-  const scheduler = new IptvScheduler();
+  const scheduler = new SyncScheduler();
   scheduler.start().catch((err) => {
     console.error('Fatal startup error:', err);
     process.exit(1);
@@ -255,4 +262,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = IptvScheduler;
+module.exports = SyncScheduler;

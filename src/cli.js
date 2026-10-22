@@ -1,5 +1,5 @@
 const path = require('path');
-const IptvScheduler = require('./scheduler');
+const SyncScheduler = require('./scheduler');
 const StorageManager = require('./storage');
 const fs = require('fs');
 
@@ -11,7 +11,7 @@ async function main() {
 
   if (args.includes('--help') || args.length === 0) {
     console.log(`
-IPTV 源自动化订阅服务 - 命令行控制工具
+订阅源自动化同步服务 - 命令行控制工具
 
 使用方法:
   node src/cli.js --run-now            立即触发一轮筛选并更新 M3U
@@ -25,7 +25,7 @@ IPTV 源自动化订阅服务 - 命令行控制工具
 
   if (args.includes('--run-now')) {
     console.log('⚡ 手动触发立即运行...');
-    const scheduler = new IptvScheduler(configPath);
+    const scheduler = new SyncScheduler(configPath);
     const res = await scheduler.runJob('manual_cli');
     console.log('\n运行结果:', JSON.stringify(res, null, 2));
     process.exit(res.success ? 0 : 1);

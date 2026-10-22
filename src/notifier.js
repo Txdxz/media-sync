@@ -49,7 +49,7 @@ class Notifier {
     } = params;
 
     const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
-    const title = isRetained ? '📺 IPTV 源每日检查：沿用当前可用源' : '🎉 IPTV 源更新成功：已切换更佳优选源';
+    const title = isRetained ? '📺 订阅源每日检查：沿用当前可用源' : '🎉 订阅源更新成功：已切换更佳优选源';
 
     const markdownText = [
       `### ${title}`,
@@ -83,7 +83,7 @@ class Notifier {
     const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
 
     const markdownText = [
-      `### ⚠️ IPTV 源自动筛选异常通知`,
+      `### ⚠️ 订阅源自动筛选异常通知`,
       `> **发生时间**：${timeStr}`,
       `> **当前状态**：<font color="warning">所有优先级档位均未能获取有效源</font>`,
       '',

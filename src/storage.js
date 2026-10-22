@@ -56,6 +56,7 @@ class StorageManager {
     if (!fs.existsSync(this.statePath)) {
       return {
         last_run_time: null,
+        last_check_time: null,
         last_success_time: null,
         consecutive_failures: 0,
         current_source: null,
@@ -68,6 +69,7 @@ class StorageManager {
     } catch (e) {
       return {
         last_run_time: null,
+        last_check_time: null,
         last_success_time: null,
         consecutive_failures: 0,
         current_source: null,
@@ -98,11 +100,13 @@ class StorageManager {
 
     this._rotateHistoryFiles();
 
+    const now = new Date().toISOString();
     const currentState = this.loadState();
-    currentState.last_run_time = new Date().toISOString();
-    currentState.last_success_time = new Date().toISOString();
+    currentState.last_run_time = now;
+    currentState.last_check_time = now;
+    currentState.last_success_time = now;
     currentState.consecutive_failures = 0;
-    currentState.current_source = sourceMetadata;
+    currentState.current_source = { ...sourceMetadata, last_verified_at: now };
     currentState.last_error = null;
     this.saveState(currentState);
 
@@ -113,11 +117,35 @@ class StorageManager {
   }
 
   recordFailure(errorMsg) {
+    const now = new Date().toISOString();
     const currentState = this.loadState();
-    currentState.last_run_time = new Date().toISOString();
+    currentState.last_run_time = now;
+    currentState.last_check_time = now;
     currentState.consecutive_failures = (currentState.consecutive_failures || 0) + 1;
     currentState.last_error = errorMsg;
     this.saveState(currentState);
+  }
+
+  /**
+   * 记录「沿用上期存活源」的结果：
+   * 不重写订阅文件，但必须刷新源状态与最近检查时间，避免状态面板展示过期信息。
+   */
+  recordRetention(sourceMetadata = {}) {
+    const now = new Date().toISOString();
+    const currentState = this.loadState();
+    const mergedSource = {
+      ...(currentState.current_source || {}),
+      ...sourceMetadata,
+      last_verified_at: now
+    };
+
+    currentState.last_run_time = now;
+    currentState.last_check_time = now;
+    currentState.consecutive_failures = 0;
+    currentState.last_error = null;
+    currentState.current_source = mergedSource;
+    this.saveState(currentState);
+    return mergedSource;
   }
 
   _rotateHistoryFiles() {

@@ -5,8 +5,8 @@ class M3uServer {
   constructor(config = {}, storageManager = null, onTriggerUpdate = null) {
     this.port = config.port || 8088;
     this.host = config.host || '0.0.0.0';
-    this.m3uRoute = config.m3u_route || '/iptv/current.m3u';
-    this.statusRoute = config.status_route || '/iptv/status';
+    this.m3uRoute = config.m3u_route || '/feed/current.m3u';
+    this.statusRoute = config.status_route || '/feed/status';
     this.authToken = config.auth_token || '';
     this.cacheControl = config.cache_control || 'no-cache, no-store, must-revalidate';
     this.storage = storageManager;
@@ -95,7 +95,7 @@ class M3uServer {
       return;
     }
 
-    if (pathname === '/iptv/trigger') {
+    if (pathname === '/feed/trigger') {
       if (typeof this.onTriggerUpdate === 'function') {
         this.onTriggerUpdate()
           .then((result) => {

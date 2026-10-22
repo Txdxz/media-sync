@@ -3,8 +3,8 @@ const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
 const { EventEmitter } = require("events");
-const IptvClient = require("../src/client");
-const { parseSourceType, matchPriorityTier, isStatusAccepted, sortCandidates, selectOptimalSource } = require("../src/selector");
+const SourceClient = require("../src/client");
+const { parseSourceType, matchPriorityTier, isStatusAccepted, sortCandidates, selectOptimalSource, PROVINCE_TO_CODE } = require("../src/selector");
 const M3uValidator = require("../src/validator");
 const StorageManager = require("../src/storage");
 const M3uServer = require("../src/server");
@@ -22,7 +22,12 @@ const mockPriorities = [
   { id: 6, name: "天津 天津联通", province: "天津", city: "天津", isp: "联通" },
   { id: 7, name: "北京 北京联通", province: "北京", city: "北京", isp: "联通" },
   { id: 8, name: "上海 上海电信", province: "上海", city: "上海", isp: "电信" },
-  { id: 9, name: "上海 上海联通", province: "上海", city: "上海", isp: "联通" }
+  { id: 9, name: "上海 上海联通", province: "上海", city: "上海", isp: "联通" },
+  { id: 10, name: "河南（运营商不限）", province: "河南" },
+  { id: 11, name: "吉林（运营商不限）", province: "吉林" },
+  { id: 12, name: "内蒙古（运营商不限）", province: "内蒙古" },
+  { id: 13, name: "江苏（运营商不限）", province: "江苏" },
+  { id: 14, name: "安徽（运营商不限）", province: "安徽" }
 ];
 
 class MockResponse extends EventEmitter {
@@ -90,7 +95,7 @@ async function runAllTests() {
     assert.ok(r3.normalizedM3u.includes("k=1"));
   });
 
-  await testCaseAsync("测试 6: 高优先级成功短路机制 (P1 成功不检查 P2-P9)", async () => {
+  await testCaseAsync("测试 6: 高优先级成功短路机制 (P1 成功不检查后续档位)", async () => {
     const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
     let queried = [];
     const mockClient = {
@@ -234,7 +239,7 @@ async function runAllTests() {
 
   await testCaseAsync("测试 16: 网站频率限制自动退避重试机制", async () => {
     let callCount = 0;
-    const client = new IptvClient({ rate_limit_retry_count: 2, rate_limit_retry_delay_ms: 10, logger: () => {} });
+    const client = new SourceClient({ rate_limit_retry_count: 2, rate_limit_retry_delay_ms: 10, logger: () => {} });
     client._request = async function() {
       callCount++;
       if (callCount === 1) return { statusCode: 200, body: JSON.stringify({ status: "error", message: "翻页过于频繁，请稍后再试。" }) };
@@ -249,11 +254,118 @@ async function runAllTests() {
     const min = 1500, max = 3000;
     const samples = [];
     for (let i = 0; i < 50; i++) {
-      const d = IptvClient.getRandomDelay(min, max);
+      const d = SourceClient.getRandomDelay(min, max);
       assert.ok(d >= min && d <= max);
       samples.push(d);
     }
     assert.ok(new Set(samples).size > 10);
+  });
+
+  testCase("测试 18: 新增档位省份解析与运营商不限匹配", () => {
+    const cases = [
+      ["河南郑州组播 河南联通", "河南", 10],
+      ["吉林长春酒店 吉林电信", "吉林", 11],
+      ["内蒙古呼和浩特组播 内蒙古移动", "内蒙古", 12],
+      ["江苏南京酒店 江苏电信", "江苏", 13],
+      ["安徽合肥组播 安徽联通", "安徽", 14]
+    ];
+    for (const [text, province, id] of cases) {
+      const parsed = parseSourceType(text);
+      assert.strictEqual(parsed.province, province);
+      assert.strictEqual(matchPriorityTier(parsed, mockPriorities).id, id);
+    }
+    // 湖南不得被误判为河南，江西不得被误判为江苏
+    assert.strictEqual(parseSourceType("湖南长沙组播 湖南联通").province, "");
+    assert.strictEqual(parseSourceType("江西南昌组播 江西电信").province, "");
+  });
+
+  testCase("测试 19: 省份查询代码映射（河南=ha、内蒙古=nm，不得与湖南/江西混淆）", () => {
+    assert.strictEqual(PROVINCE_TO_CODE["河南"], "ha");
+    assert.strictEqual(PROVINCE_TO_CODE["吉林"], "jl");
+    assert.strictEqual(PROVINCE_TO_CODE["内蒙古"], "nm");
+    assert.strictEqual(PROVINCE_TO_CODE["江苏"], "js");
+    assert.strictEqual(PROVINCE_TO_CODE["安徽"], "ah");
+    assert.notStrictEqual(PROVINCE_TO_CODE["河南"], "hn");
+    assert.notStrictEqual(PROVINCE_TO_CODE["江苏"], "jx");
+  });
+
+  await testCaseAsync("测试 20: 上期组播源存活但更高档位出现组播源时自动升级", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const lastMulti = { ip: "6.6.6.6", p: "old6", t: "multicast", type: "天津组播 天津联通", status: "存活2天", count: 160, tier: { id: 6, name: "天津 天津联通" } };
+    const mockClient = {
+      async checkSourceStillAlive() { return { isAlive: true, status: "存活3天", s: "s6" }; },
+      async fetchSourceList({ province }) {
+        if (province === "sx") {
+          return {
+            sources: [{ ip: "1.1.1.1", p: "new1", t: "multicast", count: 119, type: "山西太原组播 山西电信", status: "新上线", update_time: "2026-10-22 10:00:00" }],
+            pagination: { has_next_page: false }
+          };
+        }
+        return { sources: [], pagination: { has_next_page: false } };
+      },
+      async fetchSourceDetail() { return { s: "s1" }; },
+      async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,C\nhttp://1/rtp\n"; }
+    };
+    const res = await selectOptimalSource(mockClient, validator, mockPriorities, lastMulti, () => {}, { prefer_multicast: true });
+    assert.strictEqual(res.isRetained, false);
+    assert.strictEqual(res.tier.id, 1);
+    assert.strictEqual(res.source.p, "new1");
+  });
+
+  await testCaseAsync("测试 21: 无更高档位组播时沿用上期源，且不因低档位酒店源而误切", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const lastMulti = { ip: "6.6.6.6", p: "old6", t: "multicast", type: "天津组播 天津联通", status: "存活2天", count: 160, tier: { id: 6, name: "天津 天津联通" } };
+    const mockClient = {
+      async checkSourceStillAlive() { return { isAlive: true, status: "存活3天", s: "s6" }; },
+      async fetchSourceList({ province }) {
+        if (province === "sx") {
+          return {
+            sources: [{ ip: "9.9.9.9", p: "hotel1", t: "hotel", count: 41, type: "山西太原酒店 山西电信", status: "新上线", update_time: "2026-10-22 10:00:00" }],
+            pagination: { has_next_page: false }
+          };
+        }
+        return { sources: [], pagination: { has_next_page: false } };
+      },
+      async fetchSourceDetail() { return { s: "s1" }; },
+      async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,C\nhttp://9/rtp\n"; }
+    };
+    const res = await selectOptimalSource(mockClient, validator, mockPriorities, lastMulti, () => {}, { prefer_multicast: true });
+    assert.strictEqual(res.isRetained, true);
+    assert.strictEqual(res.source.p, "old6");
+    assert.strictEqual(res.source.status, "存活3天");
+  });
+
+  await testCaseAsync("测试 22: 上期源已是最高档位组播时直接沿用，不再发起档位扫描", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const topMulti = { ip: "1.1.1.1", p: "top1", t: "multicast", type: "山西太原组播 山西电信", status: "存活8天", count: 119, tier: { id: 1, name: "山西太原 山西电信" } };
+    let listCalled = false;
+    const mockClient = {
+      async checkSourceStillAlive() { return { isAlive: true, status: "存活9天", s: "st" }; },
+      async fetchSourceList() { listCalled = true; return { sources: [], pagination: { has_next_page: false } }; }
+    };
+    const res = await selectOptimalSource(mockClient, validator, mockPriorities, topMulti, () => {}, { prefer_multicast: true });
+    assert.strictEqual(res.isRetained, true);
+    assert.strictEqual(listCalled, false);
+  });
+
+  testCase("测试 23: 沿用分支持久化源状态与最近检查时间，且不重写订阅文件", () => {
+    setupTestEnv();
+    const storage = new StorageManager({ data_dir: TEST_DIR, current_m3u_file: path.join(TEST_DIR, "c.m3u"), state_file: path.join(TEST_DIR, "s.json"), history_dir: path.join(TEST_DIR, "h") });
+    storage.atomicUpdateM3u("#EXTM3U\n#EXTINF:-1,C\nhttp://x\n", { ip: "1.1.1.1", p: "p", t: "multicast", status: "新上线", type: "山西太原组播 山西电信" });
+    const before = storage.getCurrentM3u();
+    const beforeState = storage.loadState();
+    assert.ok(beforeState.current_source.last_verified_at);
+
+    storage.recordRetention({ status: "存活5天", s: "s2" });
+    const st = storage.loadState();
+    assert.strictEqual(st.current_source.status, "存活5天");
+    assert.strictEqual(st.current_source.ip, "1.1.1.1");
+    assert.strictEqual(st.current_source.s, "s2");
+    assert.ok(st.last_check_time);
+    assert.strictEqual(st.consecutive_failures, 0);
+    assert.strictEqual(st.last_error, null);
+    assert.strictEqual(storage.getCurrentM3u(), before);
+    teardownTestEnv();
   });
 
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);

@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  iptv-subscriber:
+  media-sync:
     build: .
-    container_name: iptv-subscriber
+    container_name: media-sync
     restart: unless-stopped
     ports:
       - "8088:8088"

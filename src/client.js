@@ -1,6 +1,6 @@
 /**
  * client.js
- * 目标网站 cqshushu IPTV 接口客户端
+ * 目标站点接口客户端
  * 采用原生 https 模块 + curl 自动回退机制，确保在各种沙箱、NAS 或代理环境中均能稳定请求
  */
 
@@ -20,7 +20,7 @@ function getRandomDelay(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-class IptvClient {
+class SourceClient {
   constructor(config = {}) {
     this.baseUrl = config.base_url || 'https://iptv.cqshushu.com';
     this.indexPath = config.index_path || '/index.php';
@@ -355,7 +355,7 @@ class IptvClient {
   }
 }
 
-IptvClient.sleep = sleep;
-IptvClient.getRandomDelay = getRandomDelay;
+SourceClient.sleep = sleep;
+SourceClient.getRandomDelay = getRandomDelay;
 
-module.exports = IptvClient;
+module.exports = SourceClient;

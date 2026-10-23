@@ -1,5 +1,5 @@
 {
-  "last_run_time": "2026-10-22T11:19:51.962Z",
+  "last_run_time": "2026-10-23T01:47:58.769Z",
   "last_success_time": "2026-10-22T11:19:51.962Z",
   "consecutive_failures": 0,
   "current_source": {
@@ -9,7 +9,7 @@
     "s": "8E1t-gtKmpdBC02KQwydZA",
     "type": "山西朔州组播 山西电信",
     "count": 119,
-    "status": "存活4天",
+    "status": "存活5天",
     "update_time": "2026-10-22 19:17:58",
     "tier": {
       "id": 3,
@@ -18,8 +18,8 @@
       "city_not": "太原",
       "isp": "电信"
     },
-    "last_verified_at": "2026-10-22T11:19:51.962Z"
+    "last_verified_at": "2026-10-23T01:47:58.769Z"
   },
   "last_error": null,
-  "last_check_time": "2026-10-22T11:19:51.962Z"
+  "last_check_time": "2026-10-23T01:47:58.769Z"
 }

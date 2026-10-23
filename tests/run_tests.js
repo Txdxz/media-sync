@@ -8,6 +8,8 @@ const { parseSourceType, matchPriorityTier, isStatusAccepted, sortCandidates, se
 const M3uValidator = require("../src/validator");
 const StorageManager = require("../src/storage");
 const M3uServer = require("../src/server");
+const Notifier = require("../src/notifier");
+const { describeTierChange } = require("../src/tier-change");
 
 const TEST_DIR = path.resolve(__dirname, "../data/test_env");
 function setupTestEnv() { if (fs.existsSync(TEST_DIR)) fs.rmSync(TEST_DIR, { recursive: true, force: true }); fs.mkdirSync(TEST_DIR, { recursive: true }); }
@@ -366,6 +368,65 @@ async function runAllTests() {
     assert.strictEqual(st.last_error, null);
     assert.strictEqual(storage.getCurrentM3u(), before);
     teardownTestEnv();
+  });
+
+  testCase("测试 24: 档位变化说明（首次 / 升级 / 降级 / 同档位 / 沿用）", () => {
+    const p6 = { id: 6, name: "天津 天津联通" };
+    const p3 = { id: 3, name: "山西其他城市电信" };
+
+    const initial = describeTierChange(null, p3);
+    assert.strictEqual(initial.direction, "initial");
+    assert.ok(initial.text.includes("首次选源"));
+
+    const up = describeTierChange(p6, p3);
+    assert.strictEqual(up.direction, "upgrade");
+    assert.ok(up.text.includes("P6 天津 天津联通 → P3 山西其他城市电信"));
+    assert.ok(up.text.includes("向上升级"));
+
+    const down = describeTierChange(p3, p6);
+    assert.strictEqual(down.direction, "downgrade");
+    assert.ok(down.text.includes("降级切换"));
+
+    const same = describeTierChange(p3, { id: 3, name: "山西其他城市电信" });
+    assert.strictEqual(same.direction, "same_tier");
+    assert.ok(same.text.includes("同档位更换源"));
+
+    const retained = describeTierChange(p3, p3, { isRetained: true });
+    assert.strictEqual(retained.direction, "retained");
+    assert.ok(retained.text.includes("维持 P3 山西其他城市电信"));
+
+    assert.strictEqual(describeTierChange(null, null).direction, "unknown");
+  });
+
+  testCase("测试 25: 成功通知卡片包含档位变化说明", () => {
+    const notifier = new Notifier({ enabled: false });
+    const md = notifier.buildSuccessMarkdown({
+      source: { ip: "1.1.1.1", type: "山西朔州组播 山西电信", status: "存活4天", update_time: "2026-10-22 19:17:58", count: 119 },
+      tier: { id: 3, name: "山西其他城市电信" },
+      isRetained: false,
+      reason: "新选中最优源",
+      tierChange: describeTierChange({ id: 6, name: "天津 天津联通" }, { id: 3, name: "山西其他城市电信" }),
+      fixedSubscribeUrl: "http://localhost:8088/feed/current.m3u",
+      channelCount: 119
+    });
+    assert.ok(md.includes("【档位变化】"));
+    assert.ok(md.includes("P6 天津 天津联通 → P3 山西其他城市电信"));
+    assert.ok(md.includes("向上升级"));
+    assert.ok(md.includes("P3 山西其他城市电信"));
+  });
+
+  testCase("测试 26: 沿用通知卡片展示维持档位", () => {
+    const notifier = new Notifier({ enabled: false });
+    const md = notifier.buildSuccessMarkdown({
+      source: { ip: "1.1.1.1", type: "山西朔州组播 山西电信", status: "存活5天", count: 119 },
+      tier: { id: 3, name: "山西其他城市电信" },
+      isRetained: true,
+      tierChange: describeTierChange({ id: 3, name: "山西其他城市电信" }, { id: 3, name: "山西其他城市电信" }, { isRetained: true }),
+      fixedSubscribeUrl: "http://localhost:8088/feed/current.m3u",
+      channelCount: 119
+    });
+    assert.ok(md.includes("维持 P3 山西其他城市电信"));
+    assert.ok(md.includes("沿用当前可用源"));
   });
 
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);

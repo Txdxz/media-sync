@@ -66,6 +66,6 @@
     "notify_on_source_change": true,
     "notify_on_all_failed": true,
     "notify_on_consecutive_failures": 3,
-    "notify_on_retained_same": false
+    "notify_on_retained_same": true
   }
 }

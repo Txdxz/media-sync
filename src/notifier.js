@@ -37,7 +37,7 @@ class Notifier {
     return false;
   }
 
-  async notifySuccess(params) {
+  buildSuccessMarkdown(params) {
     const {
       source,
       tier,
@@ -45,18 +45,20 @@ class Notifier {
       reason,
       fixedSubscribeUrl,
       rawM3uUrl,
-      channelCount
+      channelCount,
+      tierChange
     } = params;
 
     const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
     const title = isRetained ? '📺 订阅源每日检查：沿用当前可用源' : '🎉 订阅源更新成功：已切换更佳优选源';
 
-    const markdownText = [
+    return [
       `### ${title}`,
       `> **执行时间**：${timeStr}`,
       `> **更新结果**：${isRetained ? '继续沿用上期源' : '已自动更新并替换'}`,
       '',
-      `**【命中优先级】**：<font color="info">${tier ? tier.name : '未知'}</font>`,
+      `**【命中优先级】**：<font color="info">${tier ? `P${tier.id} ${tier.name}` : '未知'}</font>`,
+      `**【档位变化】**：<font color="comment">${tierChange && tierChange.text ? tierChange.text : '档位信息缺失'}</font>`,
       `**【源 IP 端口】**：\`${source.ip || '未知'}\``,
       `**【类型与运营商】**：${source.type || '未知'}`,
       `**【当前状态】**：<font color="comment">${source.status || '正常'}</font>`,
@@ -68,11 +70,13 @@ class Notifier {
       `\`${fixedSubscribeUrl || '请查看服务配置'}\``,
       rawM3uUrl ? `\n[查看原始 M3U 接口](${rawM3uUrl})` : ''
     ].join('\n');
-
-    return this._sendMarkdown(markdownText);
   }
 
-  async notifyFailure(params) {
+  async notifySuccess(params) {
+    return this._sendMarkdown(this.buildSuccessMarkdown(params));
+  }
+
+  buildFailureMarkdown(params) {
     const {
       error,
       consecutiveFailures,
@@ -82,7 +86,7 @@ class Notifier {
 
     const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
 
-    const markdownText = [
+    return [
       `### ⚠️ 订阅源自动筛选异常通知`,
       `> **发生时间**：${timeStr}`,
       `> **当前状态**：<font color="warning">所有优先级档位均未能获取有效源</font>`,
@@ -94,8 +98,10 @@ class Notifier {
       '',
       `> 提示：服务已自动保留上一次成功的 M3U 播放列表，未覆盖为空文件。电视端可继续尝试使用原有列表。`
     ].join('\n');
+  }
 
-    return this._sendMarkdown(markdownText);
+  async notifyFailure(params) {
+    return this._sendMarkdown(this.buildFailureMarkdown(params));
   }
 
   async _sendMarkdown(content) {

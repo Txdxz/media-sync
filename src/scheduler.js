@@ -11,6 +11,7 @@ const StorageManager = require('./storage');
 const Notifier = require('./notifier');
 const M3uServer = require('./server');
 const { selectOptimalSource } = require('./selector');
+const { describeTierChange } = require('./tier-change');
 
 class SyncScheduler {
   constructor(configPath = path.resolve(__dirname, '../config.json')) {
@@ -128,6 +129,7 @@ class SyncScheduler {
     const prevState = this.storage.loadState();
     const isFirstSuccess = !prevState.last_success_time;
     const lastSource = prevState.current_source;
+    const previousTier = lastSource ? lastSource.tier : null;
 
     try {
       const result = await selectOptimalSource(
@@ -173,6 +175,7 @@ class SyncScheduler {
             tier: result.tier,
             isRetained: true,
             reason: result.reason,
+            tierChange: describeTierChange(previousTier || result.tier, result.tier, { isRetained: true }),
             fixedSubscribeUrl: fixedUrl,
             rawM3uUrl: result.source.s ? `${this.config.site.base_url}${this.config.site.index_path}?s=${result.source.s}&t=${result.source.t}&channels=1&format=m3u` : null,
             channelCount: result.source.count
@@ -210,6 +213,7 @@ class SyncScheduler {
             tier: result.tier,
             isRetained: false,
             reason: '成功发现更高优先级或更新的存活源',
+            tierChange: describeTierChange(previousTier, result.tier, { isRetained: false }),
             fixedSubscribeUrl: fixedUrl,
             rawM3uUrl: rawM3u,
             channelCount: result.channelCount

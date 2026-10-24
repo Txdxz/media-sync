@@ -1,0 +1,54 @@
+name: Manual Trigger by Issue Command
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: "feed-pages"
+  cancel-in-progress: false
+
+jobs:
+  # 仅仓库所有者在本仓库 Issue 下评论 /update 才会继续；并加 10 分钟冷却
+  guard:
+    if: >
+      github.event.issue.pull_request == null &&
+      github.event.comment.user.login == github.repository_owner &&
+      github.event.comment.user.type == 'User' &&
+      github.event.comment.body == '/update'
+    runs-on: ubuntu-latest
+    outputs:
+      allowed: ${{ steps.cooldown.outputs.allowed }}
+    steps:
+      - id: cooldown
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          LAST=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/daily-sync.yml/runs?per_page=1")
+          CREATED=$(echo "${LAST}" | jq -r '.workflow_runs[0].created_at // empty')
+          if [ -z "${CREATED}" ]; then
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          AGE=$(( $(date +%s) - $(date -d "${CREATED}" +%s) ))
+          echo "最近一次更新运行在 ${AGE} 秒前"
+          if [ "${AGE}" -lt 600 ]; then
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  update:
+    needs: guard
+    if: needs.guard.outputs.allowed == 'true'
+    uses: ./.github/workflows/daily-sync.yml
+    secrets: inherit

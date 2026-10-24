@@ -1,23 +1,25 @@
 {
-  "last_run_time": "2026-10-23T14:05:58.023Z",
-  "last_success_time": "2026-10-23T14:05:58.023Z",
+  "last_run_time": "2026-10-24T02:03:42.810Z",
+  "last_success_time": "2026-10-24T02:03:42.810Z",
   "consecutive_failures": 0,
   "current_source": {
-    "ip": "1.218.136.234",
-    "p": "JStQ-xQBA9OGf_DZdbTSVA",
+    "ip": "118.102.113.228",
+    "p": "LcSBe8UY2SHb7kl6uYhhwg",
     "t": "multicast",
-    "s": "roQ7fqKddu_FonYjzpDzLg",
-    "type": "内蒙古呼和浩特组播 内蒙古电信",
-    "count": 250,
-    "status": "存活5天",
-    "update_time": "2026-10-23 10:26:40",
+    "s": "nYfHqk1EKOGOiui9wVQZPw",
+    "type": "山西忻州组播 山西联通",
+    "count": 185,
+    "status": "存活3天",
+    "update_time": "2026-10-24 08:19:21",
     "tier": {
-      "id": 12,
-      "name": "内蒙古（运营商不限）",
-      "province": "内蒙古"
+      "id": 4,
+      "name": "山西其他城市联通",
+      "province": "山西",
+      "city_not": "太原",
+      "isp": "联通"
     },
-    "last_verified_at": "2026-10-23T14:05:58.023Z"
+    "last_verified_at": "2026-10-24T02:03:42.810Z"
   },
   "last_error": null,
-  "last_check_time": "2026-10-23T14:05:58.023Z"
+  "last_check_time": "2026-10-24T02:03:42.810Z"
 }

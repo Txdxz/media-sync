@@ -90,35 +90,73 @@
     },
     {
       "id": 10,
-      "name": "河南（运营商不限）",
-      "province": "河南"
+      "name": "河南 电信",
+      "province": "河南",
+      "isp": "电信"
     },
     {
       "id": 11,
-      "name": "吉林（运营商不限）",
-      "province": "吉林"
+      "name": "河南 其他运营商",
+      "province": "河南",
+      "isp_not": "电信"
     },
     {
       "id": 12,
-      "name": "内蒙古（运营商不限）",
-      "province": "内蒙古"
+      "name": "吉林 电信",
+      "province": "吉林",
+      "isp": "电信"
     },
     {
       "id": 13,
-      "name": "江苏（运营商不限）",
-      "province": "江苏"
+      "name": "吉林 其他运营商",
+      "province": "吉林",
+      "isp_not": "电信"
     },
     {
       "id": 14,
-      "name": "安徽（运营商不限）",
-      "province": "安徽"
+      "name": "内蒙古 电信",
+      "province": "内蒙古",
+      "isp": "电信"
+    },
+    {
+      "id": 15,
+      "name": "内蒙古 其他运营商",
+      "province": "内蒙古",
+      "isp_not": "电信"
+    },
+    {
+      "id": 16,
+      "name": "江苏 电信",
+      "province": "江苏",
+      "isp": "电信"
+    },
+    {
+      "id": 17,
+      "name": "江苏 其他运营商",
+      "province": "江苏",
+      "isp_not": "电信"
+    },
+    {
+      "id": 18,
+      "name": "安徽 电信",
+      "province": "安徽",
+      "isp": "电信"
+    },
+    {
+      "id": 19,
+      "name": "安徽 其他运营商",
+      "province": "安徽",
+      "isp_not": "电信"
     }
   ],
   "selection": {
     "prefer_multicast": true,
     "upgrade_probe": true,
     "isp_allowlist": [],
-    "province_allowlist": []
+    "province_allowlist": [],
+    "prefer_cities": [
+      "晋中"
+    ]
   },
   "validation": {
     "enable_stream_probe": false,

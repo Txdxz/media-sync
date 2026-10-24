@@ -26,11 +26,16 @@ const mockPriorities = [
   { id: 7, name: "北京 北京联通", province: "北京", city: "北京", isp: "联通" },
   { id: 8, name: "上海 上海电信", province: "上海", city: "上海", isp: "电信" },
   { id: 9, name: "上海 上海联通", province: "上海", city: "上海", isp: "联通" },
-  { id: 10, name: "河南（运营商不限）", province: "河南" },
-  { id: 11, name: "吉林（运营商不限）", province: "吉林" },
-  { id: 12, name: "内蒙古（运营商不限）", province: "内蒙古" },
-  { id: 13, name: "江苏（运营商不限）", province: "江苏" },
-  { id: 14, name: "安徽（运营商不限）", province: "安徽" }
+  { id: 10, name: "河南 电信", province: "河南", isp: "电信" },
+  { id: 11, name: "河南 其他运营商", province: "河南", isp_not: "电信" },
+  { id: 12, name: "吉林 电信", province: "吉林", isp: "电信" },
+  { id: 13, name: "吉林 其他运营商", province: "吉林", isp_not: "电信" },
+  { id: 14, name: "内蒙古 电信", province: "内蒙古", isp: "电信" },
+  { id: 15, name: "内蒙古 其他运营商", province: "内蒙古", isp_not: "电信" },
+  { id: 16, name: "江苏 电信", province: "江苏", isp: "电信" },
+  { id: 17, name: "江苏 其他运营商", province: "江苏", isp_not: "电信" },
+  { id: 18, name: "安徽 电信", province: "安徽", isp: "电信" },
+  { id: 19, name: "安徽 其他运营商", province: "安徽", isp_not: "电信" }
 ];
 
 class MockResponse extends EventEmitter {
@@ -264,13 +269,18 @@ async function runAllTests() {
     assert.ok(new Set(samples).size > 10);
   });
 
-  testCase("测试 18: 新增档位省份解析与运营商不限匹配", () => {
+  testCase("测试 18: 新增档位省份解析，电信源优先一档", () => {
     const cases = [
-      ["河南郑州组播 河南联通", "河南", 10],
-      ["吉林长春酒店 吉林电信", "吉林", 11],
-      ["内蒙古呼和浩特组播 内蒙古移动", "内蒙古", 12],
-      ["江苏南京酒店 江苏电信", "江苏", 13],
-      ["安徽合肥组播 安徽联通", "安徽", 14]
+      ["河南郑州组播 河南电信", "河南", 10],
+      ["河南郑州组播 河南联通", "河南", 11],
+      ["吉林长春酒店 吉林电信", "吉林", 12],
+      ["吉林长春酒店 吉林联通", "吉林", 13],
+      ["内蒙古呼和浩特组播 内蒙古电信", "内蒙古", 14],
+      ["内蒙古呼和浩特组播 内蒙古移动", "内蒙古", 15],
+      ["江苏南京酒店 江苏电信", "江苏", 16],
+      ["江苏南京酒店 江苏联通", "江苏", 17],
+      ["安徽合肥组播 安徽电信", "安徽", 18],
+      ["安徽合肥组播 安徽联通", "安徽", 19]
     ];
     for (const [text, province, id] of cases) {
       const parsed = parseSourceType(text);
@@ -507,6 +517,26 @@ async function runAllTests() {
     assert.strictEqual(blocked, null);
     const allowed = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, isp_allowlist: ["联通"] });
     assert.strictEqual(allowed.tier.id, 6);
+  });
+
+  await testCaseAsync("测试 32: 同档位城市偏好优先晋中，未指定时按更新时间排序", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const mk = (ip, p, city, updateTime) => ({
+      ip, p, t: "multicast", count: 185, type: `山西${city}组播 山西联通`, status: "新上线", update_time: updateTime
+    });
+    const sources = [
+      mk("1.1.1.1", "xz", "忻州", "2026-10-24 11:53:59"),
+      mk("2.2.2.2", "jz", "晋中", "2026-10-24 10:17:21")
+    ];
+    const mockClient = {
+      async fetchSourceList() { return { sources, pagination: { has_next_page: false } }; },
+      async fetchSourceDetail() { return { s: "s" }; },
+      async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,C\nhttp://x/1\n"; }
+    };
+    const withPref = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, prefer_cities: ["晋中"] });
+    assert.strictEqual(withPref.source.p, "jz");
+    const noPref = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true });
+    assert.strictEqual(noPref.source.p, "xz");
   });
 
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);

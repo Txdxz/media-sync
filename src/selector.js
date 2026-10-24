@@ -152,6 +152,9 @@ function matchPriorityTier(parsed, prioritiesConfig = []) {
     if (tier.isp && parsed.isp !== tier.isp) {
       continue;
     }
+    if (tier.isp_not && parsed.isp === tier.isp_not) {
+      continue;
+    }
     return tier;
   }
 
@@ -229,6 +232,16 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
       if (!ispAllowlist.includes(parsed.isp)) return false;
     }
     return true;
+  };
+  // 城市偏好：同档位内优先尝试指定城市，失败后仍会回退到同档位其他城市
+  const preferCities = Array.isArray(options.prefer_cities) ? options.prefer_cities.map(String) : [];
+  const sortWithCityPreference = (candidates) => {
+    if (!preferCities.length) return sortCandidates(candidates);
+    const preferred = candidates.filter(c => c.parsed && preferCities.includes(c.parsed.city));
+    if (!preferred.length) return sortCandidates(candidates);
+    const preferredSet = new Set(preferred);
+    const rest = candidates.filter(c => !preferredSet.has(c));
+    return [...sortCandidates(preferred), ...sortCandidates(rest)];
   };
   const disableDelay = options.disable_delay !== undefined
     ? options.disable_delay === true
@@ -442,7 +455,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
       });
 
       if (multicastCandidates.length > 0) {
-        const sorted = sortCandidates(multicastCandidates);
+        const sorted = sortWithCityPreference(multicastCandidates);
         logger(`[Selector] [P${tier.id} 组播] 匹配到 ${sorted.length} 个组播候选源，开始依次验证...`);
         for (let i = 0; i < sorted.length; i++) {
           const cand = sorted[i];
@@ -495,7 +508,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
       continue;
     }
 
-    const sorted = sortCandidates(tierCandidates);
+    const sorted = sortWithCityPreference(tierCandidates);
     logger(`[Selector] 优先级 [P${tier.id}] 匹配到 ${sorted.length} 个候选源，开始依次验证...`);
 
     for (let i = 0; i < sorted.length; i++) {

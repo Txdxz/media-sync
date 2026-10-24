@@ -36,6 +36,8 @@ jobs:
       - name: Run Source Selection
         env:
           QYWX_WEBHOOK_URL: ${{ secrets.QYWX_WEBHOOK_URL }}
+          SUBSCRIBE_KEY: ${{ secrets.SUBSCRIBE_KEY }}
+          PAGES_BASE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
           FORCE_REFRESH: ${{ inputs.force_refresh }}
         run: |
           node src/cli.js --run-now

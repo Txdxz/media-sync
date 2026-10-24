@@ -10,6 +10,7 @@ const StorageManager = require("../src/storage");
 const M3uServer = require("../src/server");
 const Notifier = require("../src/notifier");
 const { describeTierChange } = require("../src/tier-change");
+const { buildSubscribeUrl } = require("../src/subscribe-url");
 
 const TEST_DIR = path.resolve(__dirname, "../data/test_env");
 function setupTestEnv() { if (fs.existsSync(TEST_DIR)) fs.rmSync(TEST_DIR, { recursive: true, force: true }); fs.mkdirSync(TEST_DIR, { recursive: true }); }
@@ -466,6 +467,17 @@ async function runAllTests() {
     };
     const res = await selectOptimalSource(mockClient, validator, mockPriorities, lastMulti, () => {}, { prefer_multicast: true });
     assert.strictEqual(res, null);
+  });
+
+  testCase("测试 29: 通知卡片订阅地址生成（Pages 优先，回退本地）", () => {
+    assert.strictEqual(
+      buildSubscribeUrl({ publicBaseUrl: "https://txdxz.github.io/media-sync/", subscribeKey: "demo_key.m3u", port: 8088, route: "/feed/current.m3u" }),
+      "https://txdxz.github.io/media-sync/demo_key.m3u"
+    );
+    assert.strictEqual(
+      buildSubscribeUrl({ publicBaseUrl: "", subscribeKey: "", port: 8088, route: "/feed/current.m3u" }),
+      "http://localhost:8088/feed/current.m3u"
+    );
   });
 
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);

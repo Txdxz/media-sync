@@ -12,6 +12,7 @@ const Notifier = require('./notifier');
 const M3uServer = require('./server');
 const { selectOptimalSource } = require('./selector');
 const { describeTierChange } = require('./tier-change');
+const { buildSubscribeUrl } = require('./subscribe-url');
 
 class SyncScheduler {
   constructor(configPath = path.resolve(__dirname, '../config.json')) {
@@ -158,7 +159,12 @@ class SyncScheduler {
         throw new Error(`所有 ${this.config.priorities.length} 个优先级档位均未能找到可用的订阅源`);
       }
 
-      const fixedUrl = `http://localhost:${this.config.server.port}${this.config.server.m3u_route}`;
+      const fixedUrl = buildSubscribeUrl({
+        publicBaseUrl: process.env.PAGES_BASE_URL,
+        subscribeKey: process.env.SUBSCRIBE_KEY,
+        port: this.config.server.port,
+        route: this.config.server.m3u_route
+      });
 
       if (result.isRetained) {
         // 沿用旧源：不重写订阅文件，但必须刷新源状态与最近检查时间

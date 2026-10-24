@@ -25,20 +25,94 @@
     "run_on_startup": true
   },
   "priorities": [
-    { "id": 1, "name": "山西太原 山西电信", "province": "山西", "city": "太原", "isp": "电信" },
-    { "id": 2, "name": "山西太原 山西联通", "province": "山西", "city": "太原", "isp": "联通" },
-    { "id": 3, "name": "山西其他城市电信", "province": "山西", "city_not": "太原", "isp": "电信" },
-    { "id": 4, "name": "山西其他城市联通", "province": "山西", "city_not": "太原", "isp": "联通" },
-    { "id": 5, "name": "山西其他城市移动", "province": "山西", "city_not": "太原", "isp": "移动" },
-    { "id": 6, "name": "天津 天津联通", "province": "天津", "city": "天津", "isp": "联通" },
-    { "id": 7, "name": "北京 北京联通", "province": "北京", "city": "北京", "isp": "联通" },
-    { "id": 8, "name": "上海 上海电信", "province": "上海", "city": "上海", "isp": "电信" },
-    { "id": 9, "name": "上海 上海联通", "province": "上海", "city": "上海", "isp": "联通" },
-    { "id": 10, "name": "河南（运营商不限）", "province": "河南" },
-    { "id": 11, "name": "吉林（运营商不限）", "province": "吉林" },
-    { "id": 12, "name": "内蒙古（运营商不限）", "province": "内蒙古" },
-    { "id": 13, "name": "江苏（运营商不限）", "province": "江苏" },
-    { "id": 14, "name": "安徽（运营商不限）", "province": "安徽" }
+    {
+      "id": 1,
+      "name": "山西太原 山西电信",
+      "province": "山西",
+      "city": "太原",
+      "isp": "电信"
+    },
+    {
+      "id": 2,
+      "name": "山西太原 山西联通",
+      "province": "山西",
+      "city": "太原",
+      "isp": "联通"
+    },
+    {
+      "id": 3,
+      "name": "山西其他城市电信",
+      "province": "山西",
+      "city_not": "太原",
+      "isp": "电信"
+    },
+    {
+      "id": 4,
+      "name": "山西其他城市联通",
+      "province": "山西",
+      "city_not": "太原",
+      "isp": "联通"
+    },
+    {
+      "id": 5,
+      "name": "山西其他城市移动",
+      "province": "山西",
+      "city_not": "太原",
+      "isp": "移动"
+    },
+    {
+      "id": 6,
+      "name": "天津 天津联通",
+      "province": "天津",
+      "city": "天津",
+      "isp": "联通"
+    },
+    {
+      "id": 7,
+      "name": "北京 北京联通",
+      "province": "北京",
+      "city": "北京",
+      "isp": "联通"
+    },
+    {
+      "id": 8,
+      "name": "上海 上海电信",
+      "province": "上海",
+      "city": "上海",
+      "isp": "电信"
+    },
+    {
+      "id": 9,
+      "name": "上海 上海联通",
+      "province": "上海",
+      "city": "上海",
+      "isp": "联通"
+    },
+    {
+      "id": 10,
+      "name": "河南（运营商不限）",
+      "province": "河南"
+    },
+    {
+      "id": 11,
+      "name": "吉林（运营商不限）",
+      "province": "吉林"
+    },
+    {
+      "id": 12,
+      "name": "内蒙古（运营商不限）",
+      "province": "内蒙古"
+    },
+    {
+      "id": 13,
+      "name": "江苏（运营商不限）",
+      "province": "江苏"
+    },
+    {
+      "id": 14,
+      "name": "安徽（运营商不限）",
+      "province": "安徽"
+    }
   ],
   "selection": {
     "prefer_multicast": true,
@@ -52,7 +126,7 @@
     "probe_timeout_ms": 3000,
     "min_pass_channels": 1,
     "min_channels_threshold": 10,
-    "exclude_name_keywords": ["4K", "8K", "UHD", "超高清"]
+    "exclude_name_keywords": []
   },
   "storage": {
     "data_dir": "./data",

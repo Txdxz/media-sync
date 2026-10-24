@@ -1,25 +1,25 @@
 {
-  "last_run_time": "2026-10-24T04:26:53.792Z",
-  "last_success_time": "2026-10-24T04:26:53.792Z",
+  "last_run_time": "2026-10-24T04:56:06.886Z",
+  "last_success_time": "2026-10-24T04:56:06.886Z",
   "consecutive_failures": 0,
   "current_source": {
-    "ip": "118.54.107.10",
-    "p": "i3S5kBKSvevD3Tnawzgtiw",
+    "ip": "60.236.72.117",
+    "p": "DWZzh9RKw0KARntb9-lVtg",
     "t": "multicast",
-    "s": "D_xKteIEOYEVRD5V6LZh0Q",
-    "type": "山西吕梁组播 山西联通",
+    "s": "EF7No2bDMYyJN1eiksU76Q",
+    "type": "山西晋中组播 山西联通",
     "count": 185,
-    "status": "存活2天",
-    "update_time": "2026-10-24 12:24:43",
+    "status": "存活3天",
+    "update_time": "2026-10-24 12:25:12",
     "tier": {
-      "id": 4,
+      "id": 5,
       "name": "山西其他城市联通",
       "province": "山西",
       "city_not": "太原",
       "isp": "联通"
     },
-    "last_verified_at": "2026-10-24T04:26:53.792Z"
+    "last_verified_at": "2026-10-24T04:56:06.886Z"
   },
   "last_error": null,
-  "last_check_time": "2026-10-24T04:26:53.792Z"
+  "last_check_time": "2026-10-24T04:56:06.886Z"
 }

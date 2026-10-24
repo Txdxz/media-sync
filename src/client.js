@@ -204,6 +204,16 @@ class SourceClient {
           await sleep(waitTime);
           continue;
         }
+        // 网络类瞬时错误（超时/连接重置）额外重试一次，避免因抖动误判省份无源
+        const isNetworkError = /timed out|ECONNRESET|socket hang up|ETIMEDOUT|EAI_AGAIN|ECONNREFUSED/i.test(err.message || '');
+        if (isNetworkError && attempts < 2) {
+          const waitTime = 1500 + getRandomDelay(500, 1500);
+          if (this.logger) {
+            this.logger(`[Client] ⚠️ 网络异常【${(err.message || '').slice(0, 80)}】，${waitTime}ms 后重试一次...`);
+          }
+          await sleep(waitTime);
+          continue;
+        }
         throw err;
       }
     }
@@ -325,6 +335,16 @@ class SourceClient {
           await sleep(waitTime);
           continue;
         }
+        // 网络类瞬时错误（超时/连接重置）额外重试一次
+        const isNetworkError = /timed out|ECONNRESET|socket hang up|ETIMEDOUT|EAI_AGAIN|ECONNREFUSED/i.test(err.message || '');
+        if (isNetworkError && attempts < 2) {
+          const waitTime = 1500 + getRandomDelay(500, 1500);
+          if (this.logger) {
+            this.logger(`[Client] ⚠️ 获取源详情网络异常【${(err.message || '').slice(0, 80)}】，${waitTime}ms 后重试一次...`);
+          }
+          await sleep(waitTime);
+          continue;
+        }
         throw err;
       }
     }
@@ -345,12 +365,18 @@ class SourceClient {
   async checkSourceStillAlive(p, t) {
     try {
       const detail = await this.fetchSourceDetail(p, t);
-      if (!detail.status) return false;
-      if (detail.status === '暂时失效') return false;
+      if (!detail.status) {
+        return { isAlive: false, status: null, unknown: true, error: '详情页未解析到状态' };
+      }
+      if (detail.status === '暂时失效') {
+        return { isAlive: false, status: detail.status, s: detail.s, t: detail.t };
+      }
       const isAlive = detail.status === '新上线' || /^存活\d+天$/.test(detail.status);
       return { isAlive, status: detail.status, s: detail.s, t: detail.t };
     } catch (e) {
-      return { isAlive: false, error: e.message };
+      // 网络异常/超时并不等于源已失效，必须标记为「无法确认」，
+      // 交由上层做保护性沿用，避免因一次超时误触发降级重选。
+      return { isAlive: false, unknown: true, error: e.message };
     }
   }
 }

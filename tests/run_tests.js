@@ -429,6 +429,45 @@ async function runAllTests() {
     assert.ok(md.includes("沿用当前可用源"));
   });
 
+  await testCaseAsync("测试 27: 上期源状态无法确认时保护性沿用，不触发降级重选", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false });
+    const lastMulti = { ip: "1.1.1.1", p: "p3", t: "multicast", type: "山西朔州组播 山西电信", status: "存活4天", count: 119, tier: { id: 3, name: "山西其他城市电信" } };
+    let aliveCalls = 0;
+    let listCalled = false;
+    const mockClient = {
+      async checkSourceStillAlive() { aliveCalls++; return { isAlive: false, unknown: true, error: "Request timed out after 30000ms" }; },
+      async fetchSourceList() { listCalled = true; throw new Error("should not be called"); }
+    };
+    const res = await selectOptimalSource(mockClient, validator, mockPriorities, lastMulti, () => {}, { prefer_multicast: true });
+    assert.strictEqual(res.isRetained, true);
+    assert.strictEqual(res.source.p, "p3");
+    assert.ok(res.reason.includes("保护性沿用"));
+    assert.strictEqual(aliveCalls, 2);
+    assert.strictEqual(listCalled, false);
+  });
+
+  await testCaseAsync("测试 28: 省份抓取失败时拒绝降级到更差档位", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const lastMulti = { ip: "1.1.1.1", p: "p3", t: "multicast", type: "山西朔州组播 山西电信", status: "存活4天", count: 119, tier: { id: 3, name: "山西其他城市电信" } };
+    const mockClient = {
+      async checkSourceStillAlive() { return { isAlive: false, status: "暂时失效" }; },
+      async fetchSourceList({ province }) {
+        if (province === "sx") throw new Error("Request timed out after 30000ms");
+        if (province === "nm") {
+          return {
+            sources: [{ ip: "9.9.9.9", p: "p12", t: "multicast", count: 250, type: "内蒙古呼和浩特组播 内蒙古电信", status: "新上线", update_time: "2026-10-23 10:26:40" }],
+            pagination: { has_next_page: false }
+          };
+        }
+        return { sources: [], pagination: { has_next_page: false } };
+      },
+      async fetchSourceDetail() { return { s: "s12" }; },
+      async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,C\nhttp://9/rtp\n"; }
+    };
+    const res = await selectOptimalSource(mockClient, validator, mockPriorities, lastMulti, () => {}, { prefer_multicast: true });
+    assert.strictEqual(res, null);
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

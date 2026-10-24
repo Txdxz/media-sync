@@ -2,7 +2,7 @@
   "site": {
     "base_url": "https://iptv.cqshushu.com",
     "index_path": "/index.php",
-    "request_timeout_ms": 15000,
+    "request_timeout_ms": 30000,
     "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
     "page_delay_min_ms": 1500,
     "page_delay_max_ms": 3000,

@@ -235,6 +235,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
   let survivingBackup = null;
   // 阶段 1 只探测该索引之前的档位（用于上期组播源的向上升级探测）
   let stage1TierLimit = prioritiesConfig.length;
+  const prevTier = lastSelectedSource && lastSelectedSource.tier ? lastSelectedSource.tier : null;
 
   function findTierIndex(source) {
     if (source && source.tier && source.tier.id !== undefined) {
@@ -252,7 +253,16 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
 
   if (lastSelectedSource && lastSelectedSource.p && lastSelectedSource.t) {
     logger(`[Selector] 正在复检上次已选源: IP=${lastSelectedSource.ip}, P=${lastSelectedSource.p}, 类型=${lastSelectedSource.type || lastSelectedSource.t}`);
-    const aliveCheck = await client.checkSourceStillAlive(lastSelectedSource.p, lastSelectedSource.t);
+    let aliveCheck = await client.checkSourceStillAlive(lastSelectedSource.p, lastSelectedSource.t);
+
+    // 网络异常/超时不能判定为「源已失效」，先重试一次；仍失败则保护性沿用，绝不降级
+    if (aliveCheck && aliveCheck.unknown) {
+      const retryDelay = getRandomDelay(2000, 4000);
+      logger(`[Selector] ⚠️ 无法确认上期源状态 (${aliveCheck.error || '网络异常'})，${retryDelay}ms 后重试一次...`);
+      if (!disableDelay) await sleep(retryDelay);
+      aliveCheck = await client.checkSourceStillAlive(lastSelectedSource.p, lastSelectedSource.t);
+    }
+
     if (aliveCheck && aliveCheck.isAlive) {
       const isLastMulti = isMulticastSource(lastSelectedSource);
       const retained = {
@@ -297,13 +307,34 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
         };
         stage1TierLimit = prioritiesConfig.length;
       }
+    } else if (aliveCheck && aliveCheck.unknown) {
+      logger(`[Selector] ⚠️ 两次都无法确认上期源状态 (${aliveCheck.error || '网络异常'})，触发保护：保留上期源，不执行降级重选。`);
+      return {
+        isRetained: true,
+        source: {
+          ...lastSelectedSource,
+          s: aliveCheck.s || lastSelectedSource.s
+        },
+        tier: lastSelectedSource.tier || { name: '上期优选源(沿用)' },
+        reason: `网络异常无法确认源状态，保护性沿用上期源（${aliveCheck.error || '未知错误'}）`
+      };
     } else {
-      logger(`[Selector] 上次选中的源已失效或不可达 (${aliveCheck.status || aliveCheck.error || '失效'})，开始按优先级档位重新筛选。`);
+      logger(`[Selector] 上次选中的源已失效 (${aliveCheck.status || '状态异常'})，开始按优先级档位重新筛选。`);
     }
   }
 
   // 省份拉取缓存，避免同一省份多档位重复发起 HTTP 请求
   const provinceCache = new Map();
+  // 记录抓取失败的省份：只要出现失败，就不能据此断定更高档位不可用，
+  // 因而禁止在同一次运行中降到比上期更差的档位（避免网络抖动导致误降级）。
+  const failedProvinces = new Set();
+
+  function isDowngradeBlocked(tier) {
+    if (failedProvinces.size === 0) return false;
+    if (!prevTier || prevTier.id === undefined) return false;
+    return tier.id > prevTier.id;
+  }
+
   async function fetchCandidatesForProvince(provinceCode) {
     if (provinceCache.has(provinceCode)) {
       return provinceCache.get(provinceCode);
@@ -341,6 +372,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
         if (!listResult.pagination || !listResult.pagination.has_next_page) break;
         currentPage++;
       } catch (err) {
+        failedProvinces.add(provinceCode);
         logger(`[Selector] 获取省份 [${provinceCode}] 第 ${currentPage} 页失败: ${err.message}`);
         break;
       }
@@ -409,6 +441,11 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
           logger(`[Selector] [P${tier.id} 组播候选 ${i + 1}/${sorted.length}] 验证 IP=${cand.ip}, 状态=${cand.status}, 节目数=${cand.count}, 更新时间=${cand.update_time}`);
           const res = await testCandidate(cand, tier);
           if (res) {
+            // 存在省份抓取失败时，不允许降到比上期更差的档位
+            if (isDowngradeBlocked(tier)) {
+              logger(`[Selector] ⚠️ 存在省份抓取失败，候选档位 P${tier.id} 劣于上期 P${prevTier.id}，拒绝降级切换。`);
+              return null;
+            }
             // 向上探测若命中的仍是上期同一源，维持沿用，避免无意义重写
             if (survivingBackup && lastSelectedSource && res.source.p === lastSelectedSource.p) {
               logger('[Selector] 向上探测命中的仍是上期同一源，维持沿用，避免无意义重写。');
@@ -456,10 +493,17 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
       }
       logger(`[Selector] [P${tier.id} 候选 ${i + 1}/${sorted.length}] 验证 IP=${cand.ip}, 状态=${cand.status}, 节目数=${cand.count}, 更新时间=${cand.update_time}`);
       const res = await testCandidate(cand, tier);
-      if (res) return res;
+      if (res) {
+        // 存在省份抓取失败时，不允许降到比上期更差的档位
+        if (isDowngradeBlocked(tier)) {
+          logger(`[Selector] ⚠️ 存在省份抓取失败，候选档位 P${tier.id} 劣于上期 P${prevTier.id}，拒绝降级切换。`);
+          return null;
+        }
+        return res;
+      }
     }
 
-    logger(`[Selector] 优先级 [P${tier.id}] 的所有候选源均未能通过验证，降级到下一优先级。`);
+    logger(`[Selector] 优先级 [P${tier.id}] 的所有候选源均未通过验证，降级到下一优先级。`);
   }
 
   logger('[Selector] ⚠️ 所有优先级档位均未能找到可用源！');

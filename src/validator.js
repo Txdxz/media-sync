@@ -11,6 +11,10 @@ class M3uValidator {
     this.minProbeBytes = config.min_probe_bytes || 188;
     // enforce: 探测不通过则丢弃该源；warn: 仅记录告警，仍允许选中
     this.probeMode = config.probe_mode === 'enforce' ? 'enforce' : 'warn';
+    // 某些源（如咪咕 CDN）在云端不可达、但家庭网络可播，可按来源名豁免流探测
+    this.probeExemptKeywords = Array.isArray(config.probe_exempt_keywords)
+      ? config.probe_exempt_keywords.map(k => String(k).trim()).filter(Boolean)
+      : [];
     this.minChannelsThreshold = config.min_channels_threshold || 5;
     // 按频道名过滤（如 4K/8K），避免电视端解码压力过大导致卡顿；空数组表示不过滤
     this.excludeNameKeywords = Array.isArray(config.exclude_name_keywords)
@@ -102,7 +106,11 @@ class M3uValidator {
     let probeResults = { tested: 0, passed: 0, skipped: !this.enableStreamProbe };
     let probeWarning = false;
 
-    if (this.enableStreamProbe) {
+    const probeExempt = this.probeExemptKeywords.some(k => String(context.sourceName || '').includes(k));
+    if (probeExempt) {
+      probeResults = { tested: 0, passed: 0, skipped: true, exempt: true };
+    }
+    if (this.enableStreamProbe && !probeExempt) {
       probeResults = await this._probeSampleChannels(channels.slice(0, this.probeChannelsCount));
       if (probeResults.passed < this.minPassChannels) {
         const reason = `抽样流探测未通过 (测试 ${probeResults.tested} 个，成功 ${probeResults.passed} 个，最低需要 ${this.minPassChannels} 个)`;
@@ -121,6 +129,7 @@ class M3uValidator {
         totalChannels: channels.length,
         excludedChannels,
         probe: probeResults,
+        probeExempt,
         probeWarning
       }
     };

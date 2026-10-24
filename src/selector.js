@@ -242,9 +242,13 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
   };
   // 城市偏好：同档位内优先尝试指定城市，失败后仍会回退到同档位其他城市
   const preferCities = Array.isArray(options.prefer_cities) ? options.prefer_cities.map(String) : [];
-  const sortWithCityPreference = (candidates) => {
-    if (!preferCities.length) return sortCandidates(candidates);
-    const preferred = candidates.filter(c => c.parsed && preferCities.includes(c.parsed.city));
+  const preferIps = Array.isArray(options.prefer_ips) ? options.prefer_ips.map(String) : [];
+  const sortWithPreference = (candidates) => {
+    if (!preferCities.length && !preferIps.length) return sortCandidates(candidates);
+    const preferred = candidates.filter(c =>
+      (preferCities.length && c.parsed && preferCities.includes(c.parsed.city)) ||
+      (preferIps.length && c.ip && preferIps.includes(c.ip))
+    );
     if (!preferred.length) return sortCandidates(candidates);
     const preferredSet = new Set(preferred);
     const rest = candidates.filter(c => !preferredSet.has(c));
@@ -462,7 +466,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
       });
 
       if (multicastCandidates.length > 0) {
-        const sorted = sortWithCityPreference(multicastCandidates);
+        const sorted = sortWithPreference(multicastCandidates);
         logger(`[Selector] [P${tier.id} 组播] 匹配到 ${sorted.length} 个组播候选源，开始依次验证...`);
         for (let i = 0; i < sorted.length; i++) {
           const cand = sorted[i];
@@ -515,7 +519,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
       continue;
     }
 
-    const sorted = sortWithCityPreference(tierCandidates);
+    const sorted = sortWithPreference(tierCandidates);
     logger(`[Selector] 优先级 [P${tier.id}] 匹配到 ${sorted.length} 个候选源，开始依次验证...`);
 
     for (let i = 0; i < sorted.length; i++) {

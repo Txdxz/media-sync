@@ -161,7 +161,10 @@
     "upgrade_probe": true,
     "isp_allowlist": [],
     "province_allowlist": [],
-    "prefer_cities": []
+    "prefer_cities": [],
+    "prefer_ips": [
+      "14.103.143.213"
+    ]
   },
   "validation": {
     "enable_stream_probe": true,
@@ -171,7 +174,10 @@
     "min_channels_threshold": 10,
     "exclude_name_keywords": [],
     "probe_mode": "enforce",
-    "min_probe_bytes": 188
+    "min_probe_bytes": 188,
+    "probe_exempt_keywords": [
+      "咪咕"
+    ]
   },
   "storage": {
     "data_dir": "./data",

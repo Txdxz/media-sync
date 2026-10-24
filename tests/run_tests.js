@@ -539,6 +539,8 @@ async function runAllTests() {
     assert.strictEqual(withPref.source.p, "jz");
     const noPref = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true });
     assert.strictEqual(noPref.source.p, "xz");
+    const withIp = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, prefer_ips: ["2.2.2.2"] });
+    assert.strictEqual(withIp.source.p, "jz");
   });
 
   await testCaseAsync("测试 33: 流级探测拒绝空流、接受真实 TS 数据", async () => {
@@ -571,6 +573,11 @@ async function runAllTests() {
       const rRedirect = await vRedirect.validate(`#EXTM3U\n#EXTINF:-1,C\nhttp://127.0.0.1:${port}/redirect\n`);
       assert.strictEqual(rRedirect.isValid, true);
       assert.strictEqual(rRedirect.details.probe.passed, 1);
+      const vExempt = new M3uValidator({ ...opts, probe_exempt_keywords: ["咪咕"] });
+      const rExempt = await vExempt.validate(`#EXTM3U\n#EXTINF:-1,C\nhttp://127.0.0.1:${port}/empty\n`, { sourceName: "广东深圳咪咕 广东电信" });
+      assert.strictEqual(rExempt.isValid, true);
+      assert.strictEqual(rExempt.details.probe.skipped, true);
+      assert.strictEqual(rExempt.details.probeExempt, true);
     } finally {
       server.close();
     }

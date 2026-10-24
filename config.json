@@ -34,116 +34,123 @@
     },
     {
       "id": 2,
+      "name": "广东 电信 咪咕",
+      "province": "广东",
+      "isp": "电信",
+      "source_type": "咪咕"
+    },
+    {
+      "id": 3,
       "name": "山西太原 山西联通",
       "province": "山西",
       "city": "太原",
       "isp": "联通"
     },
     {
-      "id": 3,
+      "id": 4,
       "name": "山西其他城市电信",
       "province": "山西",
       "city_not": "太原",
       "isp": "电信"
     },
     {
-      "id": 4,
+      "id": 5,
       "name": "山西其他城市联通",
       "province": "山西",
       "city_not": "太原",
       "isp": "联通"
     },
     {
-      "id": 5,
+      "id": 6,
       "name": "山西其他城市移动",
       "province": "山西",
       "city_not": "太原",
       "isp": "移动"
     },
     {
-      "id": 6,
+      "id": 7,
       "name": "天津 天津联通",
       "province": "天津",
       "city": "天津",
       "isp": "联通"
     },
     {
-      "id": 7,
+      "id": 8,
       "name": "北京 北京联通",
       "province": "北京",
       "city": "北京",
       "isp": "联通"
     },
     {
-      "id": 8,
+      "id": 9,
       "name": "上海 上海电信",
       "province": "上海",
       "city": "上海",
       "isp": "电信"
     },
     {
-      "id": 9,
+      "id": 10,
       "name": "上海 上海联通",
       "province": "上海",
       "city": "上海",
       "isp": "联通"
     },
     {
-      "id": 10,
+      "id": 11,
       "name": "河南 电信",
       "province": "河南",
       "isp": "电信"
     },
     {
-      "id": 11,
+      "id": 12,
       "name": "河南 其他运营商",
       "province": "河南",
       "isp_not": "电信"
     },
     {
-      "id": 12,
+      "id": 13,
       "name": "吉林 电信",
       "province": "吉林",
       "isp": "电信"
     },
     {
-      "id": 13,
+      "id": 14,
       "name": "吉林 其他运营商",
       "province": "吉林",
       "isp_not": "电信"
     },
     {
-      "id": 14,
+      "id": 15,
       "name": "内蒙古 电信",
       "province": "内蒙古",
       "isp": "电信"
     },
     {
-      "id": 15,
+      "id": 16,
       "name": "内蒙古 其他运营商",
       "province": "内蒙古",
       "isp_not": "电信"
     },
     {
-      "id": 16,
+      "id": 17,
       "name": "江苏 电信",
       "province": "江苏",
       "isp": "电信"
     },
     {
-      "id": 17,
+      "id": 18,
       "name": "江苏 其他运营商",
       "province": "江苏",
       "isp_not": "电信"
     },
     {
-      "id": 18,
+      "id": 19,
       "name": "安徽 电信",
       "province": "安徽",
       "isp": "电信"
     },
     {
-      "id": 19,
+      "id": 20,
       "name": "安徽 其他运营商",
       "province": "安徽",
       "isp_not": "电信"
@@ -154,9 +161,7 @@
     "upgrade_probe": true,
     "isp_allowlist": [],
     "province_allowlist": [],
-    "prefer_cities": [
-      "吕梁"
-    ]
+    "prefer_cities": []
   },
   "validation": {
     "enable_stream_probe": true,

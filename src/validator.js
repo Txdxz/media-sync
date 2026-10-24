@@ -139,7 +139,7 @@ class M3uValidator {
     };
   }
 
-  _probeUrl(streamUrl) {
+  _probeUrl(streamUrl, redirectDepth = 0) {
     return new Promise((resolve) => {
       let parsed;
       try {
@@ -169,6 +169,22 @@ class M3uValidator {
         },
         timeout: this.probeTimeoutMs
       }, (res) => {
+        // 跟随常见 3xx 跳转（咪咕等源会 302 到 HLS 地址）
+        if (res.statusCode >= 300 && res.statusCode < 400) {
+          const loc = res.headers.location;
+          res.resume();
+          if (!loc || redirectDepth >= 3) return finish(false);
+          let nextUrl;
+          try {
+            nextUrl = new URL(loc, parsed).toString();
+          } catch (e) {
+            return finish(false);
+          }
+          settled = true;
+          try { if (req) req.destroy(); } catch (e) { /* ignore */ }
+          this._probeUrl(nextUrl, redirectDepth + 1).then(resolve);
+          return;
+        }
         if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 400) {
           res.resume();
           return finish(false);
@@ -181,7 +197,7 @@ class M3uValidator {
           }
         });
         res.on('end', () => {
-          finish(buf.length >= this.minProbeBytes && this._isMediaPayload(buf, res.headers['content-type']));
+          finish(this._isMediaPayload(buf, res.headers['content-type']));
         });
         res.on('error', () => finish(false));
       });
@@ -193,11 +209,12 @@ class M3uValidator {
   }
 
   _isMediaPayload(buf, contentType = '') {
-    if (!buf || buf.length < this.minProbeBytes) return false;
-    if (buf[0] === 0x47) return true; // MPEG-TS sync byte
+    if (!buf || buf.length === 0) return false;
+    if (buf[0] === 0x47) return buf.length >= Math.min(this.minProbeBytes, 188); // MPEG-TS sync byte
     const head = buf.slice(0, 16).toString('utf8');
     if (head.startsWith('#EXTM3U')) return true; // HLS playlist
-    if (buf.slice(4, 8).toString('ascii') === 'ftyp') return true; // MP4
+    if (buf.length >= 8 && buf.slice(4, 8).toString('ascii') === 'ftyp') return true; // MP4
+    if (buf.length < this.minProbeBytes) return false;
     const ct = String(contentType || '').toLowerCase();
     return ct.includes('mpegurl') || ct.includes('mp2t') || ct.includes('video/mp4');
   }

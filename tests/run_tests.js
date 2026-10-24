@@ -18,24 +18,25 @@ function teardownTestEnv() { if (fs.existsSync(TEST_DIR)) fs.rmSync(TEST_DIR, { 
 
 const mockPriorities = [
   { id: 1, name: "山西太原 山西电信", province: "山西", city: "太原", isp: "电信" },
-  { id: 2, name: "山西太原 山西联通", province: "山西", city: "太原", isp: "联通" },
-  { id: 3, name: "山西其他城市电信", province: "山西", city_not: "太原", isp: "电信" },
-  { id: 4, name: "山西其他城市联通", province: "山西", city_not: "太原", isp: "联通" },
-  { id: 5, name: "山西其他城市移动", province: "山西", city_not: "太原", isp: "移动" },
-  { id: 6, name: "天津 天津联通", province: "天津", city: "天津", isp: "联通" },
-  { id: 7, name: "北京 北京联通", province: "北京", city: "北京", isp: "联通" },
-  { id: 8, name: "上海 上海电信", province: "上海", city: "上海", isp: "电信" },
-  { id: 9, name: "上海 上海联通", province: "上海", city: "上海", isp: "联通" },
-  { id: 10, name: "河南 电信", province: "河南", isp: "电信" },
-  { id: 11, name: "河南 其他运营商", province: "河南", isp_not: "电信" },
-  { id: 12, name: "吉林 电信", province: "吉林", isp: "电信" },
-  { id: 13, name: "吉林 其他运营商", province: "吉林", isp_not: "电信" },
-  { id: 14, name: "内蒙古 电信", province: "内蒙古", isp: "电信" },
-  { id: 15, name: "内蒙古 其他运营商", province: "内蒙古", isp_not: "电信" },
-  { id: 16, name: "江苏 电信", province: "江苏", isp: "电信" },
-  { id: 17, name: "江苏 其他运营商", province: "江苏", isp_not: "电信" },
-  { id: 18, name: "安徽 电信", province: "安徽", isp: "电信" },
-  { id: 19, name: "安徽 其他运营商", province: "安徽", isp_not: "电信" }
+  { id: 2, name: "广东 电信 咪咕", province: "广东", isp: "电信", source_type: "咪咕" },
+  { id: 3, name: "山西太原 山西联通", province: "山西", city: "太原", isp: "联通" },
+  { id: 4, name: "山西其他城市电信", province: "山西", city_not: "太原", isp: "电信" },
+  { id: 5, name: "山西其他城市联通", province: "山西", city_not: "太原", isp: "联通" },
+  { id: 6, name: "山西其他城市移动", province: "山西", city_not: "太原", isp: "移动" },
+  { id: 7, name: "天津 天津联通", province: "天津", city: "天津", isp: "联通" },
+  { id: 8, name: "北京 北京联通", province: "北京", city: "北京", isp: "联通" },
+  { id: 9, name: "上海 上海电信", province: "上海", city: "上海", isp: "电信" },
+  { id: 10, name: "上海 上海联通", province: "上海", city: "上海", isp: "联通" },
+  { id: 11, name: "河南 电信", province: "河南", isp: "电信" },
+  { id: 12, name: "河南 其他运营商", province: "河南", isp_not: "电信" },
+  { id: 13, name: "吉林 电信", province: "吉林", isp: "电信" },
+  { id: 14, name: "吉林 其他运营商", province: "吉林", isp_not: "电信" },
+  { id: 15, name: "内蒙古 电信", province: "内蒙古", isp: "电信" },
+  { id: 16, name: "内蒙古 其他运营商", province: "内蒙古", isp_not: "电信" },
+  { id: 17, name: "江苏 电信", province: "江苏", isp: "电信" },
+  { id: 18, name: "江苏 其他运营商", province: "江苏", isp_not: "电信" },
+  { id: 19, name: "安徽 电信", province: "安徽", isp: "电信" },
+  { id: 20, name: "安徽 其他运营商", province: "安徽", isp_not: "电信" }
 ];
 
 class MockResponse extends EventEmitter {
@@ -60,14 +61,14 @@ async function runAllTests() {
 
   testCase("测试 2: 城市与运营商档位匹配逻辑", () => {
     assert.strictEqual(matchPriorityTier(parseSourceType("山西太原组播 山西电信"), mockPriorities).id, 1);
-    assert.strictEqual(matchPriorityTier(parseSourceType("山西太原酒店 山西联通"), mockPriorities).id, 2);
-    assert.strictEqual(matchPriorityTier(parseSourceType("山西临汾酒店 山西电信"), mockPriorities).id, 3);
-    assert.strictEqual(matchPriorityTier(parseSourceType("山西吕梁酒店 山西联通"), mockPriorities).id, 4);
-    assert.strictEqual(matchPriorityTier(parseSourceType("山西长治组播 山西移动"), mockPriorities).id, 5);
-    assert.strictEqual(matchPriorityTier(parseSourceType("天津组播 天津联通"), mockPriorities).id, 6);
-    assert.strictEqual(matchPriorityTier(parseSourceType("北京组播 北京联通"), mockPriorities).id, 7);
-    assert.strictEqual(matchPriorityTier(parseSourceType("上海酒店 上海电信"), mockPriorities).id, 8);
-    assert.strictEqual(matchPriorityTier(parseSourceType("上海组播 上海联通"), mockPriorities).id, 9);
+    assert.strictEqual(matchPriorityTier(parseSourceType("山西太原酒店 山西联通"), mockPriorities).id, 3);
+    assert.strictEqual(matchPriorityTier(parseSourceType("山西临汾酒店 山西电信"), mockPriorities).id, 4);
+    assert.strictEqual(matchPriorityTier(parseSourceType("山西吕梁酒店 山西联通"), mockPriorities).id, 5);
+    assert.strictEqual(matchPriorityTier(parseSourceType("山西长治组播 山西移动"), mockPriorities).id, 6);
+    assert.strictEqual(matchPriorityTier(parseSourceType("天津组播 天津联通"), mockPriorities).id, 7);
+    assert.strictEqual(matchPriorityTier(parseSourceType("北京组播 北京联通"), mockPriorities).id, 8);
+    assert.strictEqual(matchPriorityTier(parseSourceType("上海酒店 上海电信"), mockPriorities).id, 9);
+    assert.strictEqual(matchPriorityTier(parseSourceType("上海组播 上海联通"), mockPriorities).id, 10);
   });
 
   testCase("测试 3: 状态过滤规则 (新上线/存活x天 vs 暂时失效)", () => {
@@ -129,7 +130,7 @@ async function runAllTests() {
       async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,CCTV\nhttp://2.2.2.2/live.m3u8\n"; }
     };
     const res = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {});
-    assert.strictEqual(res.tier.id, 2);
+    assert.strictEqual(res.tier.id, 3);
   });
 
   await testCaseAsync("测试 8: 上期存活源优先沿用机制", async () => {
@@ -271,16 +272,17 @@ async function runAllTests() {
 
   testCase("测试 18: 新增档位省份解析，电信源优先一档", () => {
     const cases = [
-      ["河南郑州组播 河南电信", "河南", 10],
-      ["河南郑州组播 河南联通", "河南", 11],
-      ["吉林长春酒店 吉林电信", "吉林", 12],
-      ["吉林长春酒店 吉林联通", "吉林", 13],
-      ["内蒙古呼和浩特组播 内蒙古电信", "内蒙古", 14],
-      ["内蒙古呼和浩特组播 内蒙古移动", "内蒙古", 15],
-      ["江苏南京酒店 江苏电信", "江苏", 16],
-      ["江苏南京酒店 江苏联通", "江苏", 17],
-      ["安徽合肥组播 安徽电信", "安徽", 18],
-      ["安徽合肥组播 安徽联通", "安徽", 19]
+      ["广东深圳咪咕 广东电信", "广东", 2],
+      ["河南郑州组播 河南电信", "河南", 11],
+      ["河南郑州组播 河南联通", "河南", 12],
+      ["吉林长春酒店 吉林电信", "吉林", 13],
+      ["吉林长春酒店 吉林联通", "吉林", 14],
+      ["内蒙古呼和浩特组播 内蒙古电信", "内蒙古", 15],
+      ["内蒙古呼和浩特组播 内蒙古移动", "内蒙古", 16],
+      ["江苏南京酒店 江苏电信", "江苏", 17],
+      ["江苏南京酒店 江苏联通", "江苏", 18],
+      ["安徽合肥组播 安徽电信", "安徽", 19],
+      ["安徽合肥组播 安徽联通", "安徽", 20]
     ];
     for (const [text, province, id] of cases) {
       const parsed = parseSourceType(text);
@@ -304,7 +306,7 @@ async function runAllTests() {
 
   await testCaseAsync("测试 20: 上期组播源存活但更高档位出现组播源时自动升级", async () => {
     const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
-    const lastMulti = { ip: "6.6.6.6", p: "old6", t: "multicast", type: "天津组播 天津联通", status: "存活2天", count: 160, tier: { id: 6, name: "天津 天津联通" } };
+    const lastMulti = { ip: "6.6.6.6", p: "old6", t: "multicast", type: "天津组播 天津联通", status: "存活2天", count: 160, tier: { id: 7, name: "天津 天津联通" } };
     const mockClient = {
       async checkSourceStillAlive() { return { isAlive: true, status: "存活3天", s: "s6" }; },
       async fetchSourceList({ province }) {
@@ -327,7 +329,7 @@ async function runAllTests() {
 
   await testCaseAsync("测试 21: 无更高档位组播时沿用上期源，且不因低档位酒店源而误切", async () => {
     const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
-    const lastMulti = { ip: "6.6.6.6", p: "old6", t: "multicast", type: "天津组播 天津联通", status: "存活2天", count: 160, tier: { id: 6, name: "天津 天津联通" } };
+    const lastMulti = { ip: "6.6.6.6", p: "old6", t: "multicast", type: "天津组播 天津联通", status: "存活2天", count: 160, tier: { id: 7, name: "天津 天津联通" } };
     const mockClient = {
       async checkSourceStillAlive() { return { isAlive: true, status: "存活3天", s: "s6" }; },
       async fetchSourceList({ province }) {
@@ -516,7 +518,7 @@ async function runAllTests() {
     const blocked = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, isp_allowlist: ["电信"] });
     assert.strictEqual(blocked, null);
     const allowed = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, isp_allowlist: ["联通"] });
-    assert.strictEqual(allowed.tier.id, 6);
+    assert.strictEqual(allowed.tier.id, 7);
   });
 
   await testCaseAsync("测试 32: 同档位城市偏好优先晋中，未指定时按更新时间排序", async () => {
@@ -542,6 +544,11 @@ async function runAllTests() {
   await testCaseAsync("测试 33: 流级探测拒绝空流、接受真实 TS 数据", async () => {
     const http = require("http");
     const server = http.createServer((req, res) => {
+      if (req.url === "/redirect") {
+        res.writeHead(302, { Location: "/ts" });
+        res.end();
+        return;
+      }
       res.writeHead(200, { "Content-Type": "application/octet-stream" });
       if (req.url === "/ts") {
         res.end(Buffer.alloc(376, 0x47));
@@ -560,6 +567,10 @@ async function runAllTests() {
       const rTs = await vTs.validate(`#EXTM3U\n#EXTINF:-1,C\nhttp://127.0.0.1:${port}/ts\n`);
       assert.strictEqual(rTs.isValid, true);
       assert.strictEqual(rTs.details.probe.passed, 1);
+      const vRedirect = new M3uValidator({ ...opts });
+      const rRedirect = await vRedirect.validate(`#EXTM3U\n#EXTINF:-1,C\nhttp://127.0.0.1:${port}/redirect\n`);
+      assert.strictEqual(rRedirect.isValid, true);
+      assert.strictEqual(rRedirect.details.probe.passed, 1);
     } finally {
       server.close();
     }

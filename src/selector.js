@@ -24,7 +24,8 @@ const PROVINCE_TO_CODE = {
   '吉林': 'jl',
   '内蒙古': 'nm',
   '江苏': 'js',
-  '安徽': 'ah'
+  '安徽': 'ah',
+  '广东': 'gd'
 };
 
 /**
@@ -65,6 +66,8 @@ function parseSourceType(typeStr = '') {
     province = '江苏';
   } else if (text.includes('安徽')) {
     province = '安徽';
+  } else if (text.includes('广东')) {
+    province = '广东';
   }
 
   // 2. 判断城市（特别是山西省内各市）
@@ -155,6 +158,9 @@ function matchPriorityTier(parsed, prioritiesConfig = []) {
     if (tier.isp_not && parsed.isp === tier.isp_not) {
       continue;
     }
+    if (tier.source_type && parsed.sourceType !== tier.source_type) {
+      continue;
+    }
     return tier;
   }
 
@@ -168,9 +174,10 @@ function matchPriorityTier(parsed, prioritiesConfig = []) {
  */
 function isMulticastSource(source) {
   if (!source) return false;
-  if (source.t === 'multicast') return true;
-  if (source.type && source.type.includes('组播')) return true;
-  if (source.parsed && source.parsed.sourceType === '组播') return true;
+  // 咪咕源（t=migu）与组播同属“优先源类型”，参与阶段 1 定向巡检与同档位优先排序
+  if (source.t === 'multicast' || source.t === 'migu') return true;
+  if (source.type && (source.type.includes('组播') || source.type.includes('咪咕'))) return true;
+  if (source.parsed && (source.parsed.sourceType === '组播' || source.parsed.sourceType === '咪咕')) return true;
   return false;
 }
 

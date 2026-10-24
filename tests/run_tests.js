@@ -480,6 +480,35 @@ async function runAllTests() {
     );
   });
 
+  await testCaseAsync("测试 30: 过滤 4K/8K 频道并保留高清频道", async () => {
+    const v = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1, exclude_name_keywords: ["4K", "8K", "UHD", "超高清"] });
+    const m3u = "#EXTM3U\n#EXTINF:-1,北京卫视4K\nhttp://x/1\n#EXTINF:-1,CCTV1HD\nhttp://x/2\n#EXTINF:-1,超高清测试\nhttp://x/3\n";
+    const r = await v.validate(m3u);
+    assert.strictEqual(r.isValid, true);
+    assert.strictEqual(r.channelCount, 1);
+    assert.ok(r.normalizedM3u.includes("CCTV1HD"));
+    assert.ok(!r.normalizedM3u.includes("4K"));
+    assert.strictEqual(r.details.excludedChannels, 2);
+  });
+
+  await testCaseAsync("测试 31: 运营商白名单过滤", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const mockClient = {
+      async fetchSourceList() {
+        return {
+          sources: [{ ip: "6.6.6.6", p: "tj", t: "multicast", count: 160, type: "天津组播 天津联通", status: "新上线", update_time: "2026-10-24 10:00:00" }],
+          pagination: { has_next_page: false }
+        };
+      },
+      async fetchSourceDetail() { return { s: "s" }; },
+      async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,C\nhttp://x/1\n"; }
+    };
+    const blocked = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, isp_allowlist: ["电信"] });
+    assert.strictEqual(blocked, null);
+    const allowed = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, isp_allowlist: ["联通"] });
+    assert.strictEqual(allowed.tier.id, 6);
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

@@ -218,6 +218,18 @@ function sortCandidates(candidates = []) {
 async function selectOptimalSource(client, validator, prioritiesConfig, lastSelectedSource = null, logger = console.log, options = {}) {
   const preferMulticast = options.prefer_multicast !== false;
   const upgradeProbe = options.upgrade_probe !== false;
+  // 可选白名单：限定运营商/省份；为空表示不限制
+  const ispAllowlist = Array.isArray(options.isp_allowlist) ? options.isp_allowlist.map(String) : [];
+  const provinceAllowlist = Array.isArray(options.province_allowlist) ? options.province_allowlist.map(String) : [];
+  const isAllowlisted = (parsed) => {
+    if (!parsed) return false;
+    if (provinceAllowlist.length && !provinceAllowlist.includes(parsed.province)) return false;
+    if (ispAllowlist.length) {
+      if (!parsed.isp) return false;
+      if (!ispAllowlist.includes(parsed.isp)) return false;
+    }
+    return true;
+  };
   const disableDelay = options.disable_delay !== undefined
     ? options.disable_delay === true
     : (process.env.NODE_ENV === 'test');
@@ -424,6 +436,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
       const allSources = await fetchCandidatesForProvince(provinceCode);
       const multicastCandidates = allSources.filter(src => {
         if (!isMulticastSource(src)) return false;
+        if (!isAllowlisted(src.parsed)) return false;
         const matchedTier = matchPriorityTier(src.parsed, [tier]);
         return matchedTier && matchedTier.id === tier.id;
       });
@@ -472,6 +485,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
     const provinceCode = PROVINCE_TO_CODE[tier.province] || 'all';
     const allSources = await fetchCandidatesForProvince(provinceCode);
     const tierCandidates = allSources.filter(src => {
+      if (!isAllowlisted(src.parsed)) return false;
       const matchedTier = matchPriorityTier(src.parsed, [tier]);
       return matchedTier && matchedTier.id === tier.id;
     });

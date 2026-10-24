@@ -42,14 +42,17 @@
   ],
   "selection": {
     "prefer_multicast": true,
-    "upgrade_probe": true
+    "upgrade_probe": true,
+    "isp_allowlist": [],
+    "province_allowlist": []
   },
   "validation": {
     "enable_stream_probe": false,
     "probe_channels_count": 3,
     "probe_timeout_ms": 3000,
     "min_pass_channels": 1,
-    "min_channels_threshold": 10
+    "min_channels_threshold": 10,
+    "exclude_name_keywords": ["4K", "8K", "UHD", "超高清"]
   },
   "storage": {
     "data_dir": "./data",

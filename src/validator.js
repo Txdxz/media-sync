@@ -9,6 +9,10 @@ class M3uValidator {
     this.probeTimeoutMs = config.probe_timeout_ms || 3000;
     this.minPassChannels = config.min_pass_channels || 1;
     this.minChannelsThreshold = config.min_channels_threshold || 5;
+    // 按频道名过滤（如 4K/8K），避免电视端解码压力过大导致卡顿；空数组表示不过滤
+    this.excludeNameKeywords = Array.isArray(config.exclude_name_keywords)
+      ? config.exclude_name_keywords.map(k => String(k).trim()).filter(Boolean)
+      : [];
   }
 
   async validate(m3uContent, context = {}) {
@@ -28,7 +32,11 @@ class M3uValidator {
 
     const lines = trimmed.split(/\r?\n/);
     const channels = [];
+    const excludedLineIndexes = new Set();
+    const excludeKeywords = this.excludeNameKeywords.map(k => k.toLowerCase());
+    let excludedChannels = 0;
     let currentInf = null;
+    let currentInfIndex = -1;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
@@ -36,12 +44,22 @@ class M3uValidator {
 
       if (line.startsWith('#EXTINF:')) {
         currentInf = line;
+        currentInfIndex = i;
       } else if (!line.startsWith('#') && currentInf) {
-        channels.push({
-          inf: currentInf,
-          url: line
-        });
+        const channelName = currentInf.slice(currentInf.lastIndexOf(',') + 1);
+        const isExcluded = excludeKeywords.some(k => channelName.toLowerCase().includes(k));
+        if (isExcluded) {
+          excludedChannels++;
+          // 连同 EXTINF 与中间的指令行一起剔除
+          for (let j = currentInfIndex; j <= i; j++) excludedLineIndexes.add(j);
+        } else {
+          channels.push({
+            inf: currentInf,
+            url: line
+          });
+        }
         currentInf = null;
+        currentInfIndex = -1;
       }
     }
 
@@ -56,6 +74,7 @@ class M3uValidator {
     normalizedLines.push(lines[0]);
 
     for (let i = 1; i < lines.length; i++) {
+      if (excludedLineIndexes.has(i)) continue;
       const line = lines[i].trim();
       if (!line) {
         normalizedLines.push('');
@@ -95,6 +114,7 @@ class M3uValidator {
       normalizedM3u,
       details: {
         totalChannels: channels.length,
+        excludedChannels,
         probe: probeResults
       }
     };

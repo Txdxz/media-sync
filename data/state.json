@@ -1,6 +1,6 @@
 {
-  "last_run_time": "2026-10-24T03:40:32.529Z",
-  "last_success_time": "2026-10-24T03:35:52.126Z",
+  "last_run_time": "2026-10-24T03:54:00.410Z",
+  "last_success_time": "2026-10-24T03:54:00.410Z",
   "consecutive_failures": 0,
   "current_source": {
     "ip": "118.102.113.228",
@@ -8,9 +8,9 @@
     "t": "multicast",
     "s": "nYfHqk1EKOGOiui9wVQZPw",
     "type": "山西忻州组播 山西联通",
-    "count": 185,
+    "count": 176,
     "status": "存活3天",
-    "update_time": "2026-10-24 10:24:21",
+    "update_time": "2026-10-24 11:35:51",
     "tier": {
       "id": 4,
       "name": "山西其他城市联通",
@@ -18,8 +18,8 @@
       "city_not": "太原",
       "isp": "联通"
     },
-    "last_verified_at": "2026-10-24T03:40:32.529Z"
+    "last_verified_at": "2026-10-24T03:54:00.410Z"
   },
   "last_error": null,
-  "last_check_time": "2026-10-24T03:40:32.529Z"
+  "last_check_time": "2026-10-24T03:54:00.410Z"
 }

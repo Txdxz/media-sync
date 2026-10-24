@@ -1,25 +1,25 @@
 {
-  "last_run_time": "2026-10-24T04:56:06.886Z",
-  "last_success_time": "2026-10-24T04:56:06.886Z",
+  "last_run_time": "2026-10-24T04:58:50.132Z",
+  "last_success_time": "2026-10-24T04:58:50.132Z",
   "consecutive_failures": 0,
   "current_source": {
-    "ip": "60.236.72.117",
-    "p": "DWZzh9RKw0KARntb9-lVtg",
-    "t": "multicast",
-    "s": "EF7No2bDMYyJN1eiksU76Q",
-    "type": "山西晋中组播 山西联通",
-    "count": 185,
-    "status": "存活3天",
-    "update_time": "2026-10-24 12:25:12",
+    "ip": "14.103.143.213",
+    "p": "ForFVu_aFtU3FpwnEpG2Zg",
+    "t": "migu",
+    "s": "YPTk0emdIiPNsSkjfsb0kQ",
+    "type": "广东深圳咪咕 广东电信",
+    "count": 651,
+    "status": "新上线",
+    "update_time": "2026-10-24 12:47:52",
     "tier": {
-      "id": 5,
-      "name": "山西其他城市联通",
-      "province": "山西",
-      "city_not": "太原",
-      "isp": "联通"
+      "id": 2,
+      "name": "广东 电信 咪咕",
+      "province": "广东",
+      "isp": "电信",
+      "source_type": "咪咕"
     },
-    "last_verified_at": "2026-10-24T04:56:06.886Z"
+    "last_verified_at": "2026-10-24T04:58:50.132Z"
   },
   "last_error": null,
-  "last_check_time": "2026-10-24T04:56:06.886Z"
+  "last_check_time": "2026-10-24T04:58:50.132Z"
 }

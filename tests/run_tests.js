@@ -539,6 +539,32 @@ async function runAllTests() {
     assert.strictEqual(noPref.source.p, "xz");
   });
 
+  await testCaseAsync("测试 33: 流级探测拒绝空流、接受真实 TS 数据", async () => {
+    const http = require("http");
+    const server = http.createServer((req, res) => {
+      res.writeHead(200, { "Content-Type": "application/octet-stream" });
+      if (req.url === "/ts") {
+        res.end(Buffer.alloc(376, 0x47));
+      } else {
+        res.end();
+      }
+    });
+    await new Promise(r => server.listen(0, "127.0.0.1", r));
+    const port = server.address().port;
+    try {
+      const opts = { enable_stream_probe: true, probe_mode: "enforce", min_channels_threshold: 1, probe_channels_count: 1, probe_timeout_ms: 3000, min_probe_bytes: 188 };
+      const vEmpty = new M3uValidator({ ...opts });
+      const rEmpty = await vEmpty.validate(`#EXTM3U\n#EXTINF:-1,C\nhttp://127.0.0.1:${port}/empty\n`);
+      assert.strictEqual(rEmpty.isValid, false);
+      const vTs = new M3uValidator({ ...opts });
+      const rTs = await vTs.validate(`#EXTM3U\n#EXTINF:-1,C\nhttp://127.0.0.1:${port}/ts\n`);
+      assert.strictEqual(rTs.isValid, true);
+      assert.strictEqual(rTs.details.probe.passed, 1);
+    } finally {
+      server.close();
+    }
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

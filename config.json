@@ -152,21 +152,21 @@
   "selection": {
     "prefer_multicast": true,
     "upgrade_probe": true,
-    "isp_allowlist": [
-      "电信"
-    ],
-    "province_allowlist": [
-      "河南"
-    ],
-    "prefer_cities": []
+    "isp_allowlist": [],
+    "province_allowlist": [],
+    "prefer_cities": [
+      "吕梁"
+    ]
   },
   "validation": {
-    "enable_stream_probe": false,
-    "probe_channels_count": 3,
-    "probe_timeout_ms": 3000,
+    "enable_stream_probe": true,
+    "probe_channels_count": 2,
+    "probe_timeout_ms": 8000,
     "min_pass_channels": 1,
     "min_channels_threshold": 10,
-    "exclude_name_keywords": []
+    "exclude_name_keywords": [],
+    "probe_mode": "enforce",
+    "min_probe_bytes": 188
   },
   "storage": {
     "data_dir": "./data",

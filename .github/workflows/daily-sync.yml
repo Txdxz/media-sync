@@ -5,6 +5,12 @@ on:
     # 每天北京时间 17:00 (UTC 09:00) 自动执行
     - cron: '0 9 * * *'
   workflow_dispatch: # 支持在 GitHub 页面随时手动一键触发
+    inputs:
+      force_refresh:
+        description: '强制重新筛选（忽略上期沿用，用于恢复发布文件）'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -30,6 +36,7 @@ jobs:
       - name: Run Source Selection
         env:
           QYWX_WEBHOOK_URL: ${{ secrets.QYWX_WEBHOOK_URL }}
+          FORCE_REFRESH: ${{ inputs.force_refresh }}
         run: |
           node src/cli.js --run-now
 
@@ -44,7 +51,31 @@ jobs:
           git add data/state.json .gitignore
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore(data): auto sync feed state [skip ci]" && git push origin main)
 
+      - name: Ensure Playlist Present
+        id: playlist
+        env:
+          SUBSCRIBE_KEY: ${{ secrets.SUBSCRIBE_KEY }}
+        run: |
+          set -euo pipefail
+          KEY="${SUBSCRIBE_KEY:?SUBSCRIBE_KEY 未配置}"
+          CLEAN_KEY="${KEY%.m3u}"
+          PAGES_BASE="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY##*/}"
+          # 沿用日不会生成本地文件：先从线上恢复，避免发布空站点把订阅文件冲掉
+          if [ ! -s ./data/current.m3u ]; then
+            echo "本地无播放列表，尝试从线上恢复..."
+            curl -fsSL --max-time 20 --retry 2 \
+              "${PAGES_BASE}/${CLEAN_KEY}.m3u?ts=$(date +%s)" \
+              -o ./data/current.m3u || true
+          fi
+          if [ -s ./data/current.m3u ]; then
+            echo "has_m3u=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_m3u=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::未能获取播放列表，本次跳过 Pages 发布以保留线上版本"
+          fi
+
       - name: Prepare Obfuscated Pages Artifact
+        if: steps.playlist.outputs.has_m3u == 'true'
         env:
           SUBSCRIBE_KEY: ${{ secrets.SUBSCRIBE_KEY }}
         run: |
@@ -53,16 +84,14 @@ jobs:
           KEY="${SUBSCRIBE_KEY:?SUBSCRIBE_KEY 未配置，已中止发布以保护订阅地址}"
           # 自动剔除可能误填的 .m3u 后缀，避免重复拼接为 .m3u.m3u
           CLEAN_KEY="${KEY%.m3u}"
-          
-          if [ -f "./data/current.m3u" ]; then
-            # 同时生成带 .m3u 和不带后缀的文件，确保怎么输入都能正常访问
-            cp ./data/current.m3u "./public/${CLEAN_KEY}.m3u"
-            cp ./data/current.m3u "./public/${CLEAN_KEY}"
-          fi
+
+          # 同时生成带 .m3u 和不带后缀的文件，确保怎么输入都能正常访问
+          cp ./data/current.m3u "./public/${CLEAN_KEY}.m3u"
+          cp ./data/current.m3u "./public/${CLEAN_KEY}"
           if [ -f "./data/state.json" ]; then
             cp ./data/state.json "./public/${CLEAN_KEY}_status.json"
           fi
-          
+
           # 部署根目录 404 伪装页面，隐藏目录列表，阻断直接扫域名
           cat << 'EOF' > ./public/index.html
           <!DOCTYPE html>
@@ -76,10 +105,12 @@ jobs:
           EOF
 
       - name: Upload GitHub Pages Artifact
+        if: steps.playlist.outputs.has_m3u == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
 
       - name: Deploy to GitHub Pages
+        if: steps.playlist.outputs.has_m3u == 'true'
         id: deployment
         uses: actions/deploy-pages@v4

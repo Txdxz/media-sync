@@ -15,6 +15,7 @@ async function main() {
 
 使用方法:
   node src/cli.js --run-now            立即触发一轮筛选并更新 M3U
+  node src/cli.js --run-now --force    强制重选（忽略上期沿用，重写订阅文件）
   node src/cli.js --status             查看当前运行状态与当前源元数据
   node src/cli.js --list-history       列出所有可用的历史快照备份
   node src/cli.js --rollback <file>    回滚到指定的历史版本文件
@@ -24,6 +25,9 @@ async function main() {
   }
 
   if (args.includes('--run-now')) {
+    if (args.includes('--force')) {
+      process.env.FORCE_REFRESH = '1';
+    }
     console.log('⚡ 手动触发立即运行...');
     const scheduler = new SyncScheduler(configPath);
     const res = await scheduler.runJob('manual_cli');

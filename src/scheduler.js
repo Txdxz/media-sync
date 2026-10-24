@@ -128,8 +128,15 @@ class SyncScheduler {
 
     const prevState = this.storage.loadState();
     const isFirstSuccess = !prevState.last_success_time;
-    const lastSource = prevState.current_source;
-    const previousTier = lastSource ? lastSource.tier : null;
+    const forceRefresh = /^(1|true)$/i.test(String(process.env.FORCE_REFRESH || '').trim());
+    const previousSource = prevState.current_source;
+    // 强制刷新：忽略上期源，走完整重选并重写订阅文件（用于恢复被冲掉的发布文件）
+    const lastSource = forceRefresh ? null : previousSource;
+    const previousTier = previousSource ? previousSource.tier : null;
+
+    if (forceRefresh) {
+      console.log('♻️ 已启用强制刷新：忽略上期沿用，执行完整重选。');
+    }
 
     try {
       const result = await selectOptimalSource(

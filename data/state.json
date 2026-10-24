@@ -1,5 +1,5 @@
 {
-  "last_run_time": "2026-10-24T03:38:08.404Z",
+  "last_run_time": "2026-10-24T03:40:32.529Z",
   "last_success_time": "2026-10-24T03:35:52.126Z",
   "consecutive_failures": 0,
   "current_source": {
@@ -18,8 +18,8 @@
       "city_not": "太原",
       "isp": "联通"
     },
-    "last_verified_at": "2026-10-24T03:38:08.404Z"
+    "last_verified_at": "2026-10-24T03:40:32.529Z"
   },
   "last_error": null,
-  "last_check_time": "2026-10-24T03:38:08.404Z"
+  "last_check_time": "2026-10-24T03:40:32.529Z"
 }

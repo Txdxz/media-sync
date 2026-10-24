@@ -1,24 +1,25 @@
 {
-  "last_run_time": "2026-10-24T04:18:06.680Z",
-  "last_success_time": "2026-10-24T04:18:06.680Z",
+  "last_run_time": "2026-10-24T04:26:53.792Z",
+  "last_success_time": "2026-10-24T04:26:53.792Z",
   "consecutive_failures": 0,
   "current_source": {
-    "ip": "171.243.32.221",
-    "p": "VVAvPEYwQvWsrcNpcO9Scg",
+    "ip": "118.54.107.10",
+    "p": "i3S5kBKSvevD3Tnawzgtiw",
     "t": "multicast",
-    "s": "JFkoDdikDnfY2_JBT-ndDw",
-    "type": "河南郑州组播 河南电信",
-    "count": 327,
-    "status": "新上线",
-    "update_time": "2026-10-24 12:15:54",
+    "s": "D_xKteIEOYEVRD5V6LZh0Q",
+    "type": "山西吕梁组播 山西联通",
+    "count": 185,
+    "status": "存活2天",
+    "update_time": "2026-10-24 12:24:43",
     "tier": {
-      "id": 10,
-      "name": "河南 电信",
-      "province": "河南",
-      "isp": "电信"
+      "id": 4,
+      "name": "山西其他城市联通",
+      "province": "山西",
+      "city_not": "太原",
+      "isp": "联通"
     },
-    "last_verified_at": "2026-10-24T04:18:06.680Z"
+    "last_verified_at": "2026-10-24T04:26:53.792Z"
   },
   "last_error": null,
-  "last_check_time": "2026-10-24T04:18:06.680Z"
+  "last_check_time": "2026-10-24T04:26:53.792Z"
 }

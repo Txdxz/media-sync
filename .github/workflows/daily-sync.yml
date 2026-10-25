@@ -51,7 +51,11 @@ jobs:
           git rm -rf data/history 2>/dev/null || true
           # 仅跟踪状态元数据与 .gitignore
           git add data/state.json .gitignore
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(data): auto sync feed state [skip ci]" && git push origin main)
+          if ! git diff --quiet || ! git diff --staged --quiet; then
+            git commit -m "chore(data): auto sync feed state [skip ci]"
+            # 与手动推送并发时先变基再推，避免 non-fast-forward 导致整个任务失败
+            git push origin main || (git pull --rebase origin main && git push origin main)
+          fi
 
       - name: Ensure Playlist Present
         id: playlist

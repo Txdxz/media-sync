@@ -1,25 +1,24 @@
 {
-  "last_run_time": "2026-10-24T13:05:40.301Z",
-  "last_success_time": "2026-10-24T04:58:50.132Z",
+  "last_run_time": "2026-10-25T03:08:43.836Z",
+  "last_success_time": "2026-10-25T03:08:43.836Z",
   "consecutive_failures": 0,
   "current_source": {
-    "ip": "14.103.143.213",
-    "p": "ForFVu_aFtU3FpwnEpG2Zg",
-    "t": "migu",
-    "s": "YPTk0emdIiPNsSkjfsb0kQ",
-    "type": "广东深圳咪咕 广东电信",
-    "count": 651,
+    "ip": "183.204.201.124",
+    "p": "e4dADgxb0wSRxXjIaQYY4A",
+    "t": "multicast",
+    "s": "z-xxAKTM7qG9JJibywWAJQ",
+    "type": "广东惠州组播 广东电信",
+    "count": 344,
     "status": "新上线",
-    "update_time": "2026-10-24 12:47:52",
+    "update_time": "2026-10-25 11:01:29",
     "tier": {
       "id": 2,
-      "name": "广东 电信 咪咕",
+      "name": "广东 电信 优先源",
       "province": "广东",
-      "isp": "电信",
-      "source_type": "咪咕"
+      "isp": "电信"
     },
-    "last_verified_at": "2026-10-24T13:05:40.301Z"
+    "last_verified_at": "2026-10-25T03:08:43.836Z"
   },
   "last_error": null,
-  "last_check_time": "2026-10-24T13:05:40.301Z"
+  "last_check_time": "2026-10-25T03:08:43.836Z"
 }

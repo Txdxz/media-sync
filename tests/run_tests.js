@@ -18,7 +18,7 @@ function teardownTestEnv() { if (fs.existsSync(TEST_DIR)) fs.rmSync(TEST_DIR, { 
 
 const mockPriorities = [
   { id: 1, name: "山西太原 山西电信", province: "山西", city: "太原", isp: "电信" },
-  { id: 2, name: "广东 电信 咪咕", province: "广东", isp: "电信", source_type: "咪咕" },
+  { id: 2, name: "广东 电信 优先源", province: "广东", isp: "电信" },
   { id: 3, name: "山西太原 山西联通", province: "山西", city: "太原", isp: "联通" },
   { id: 4, name: "山西其他城市电信", province: "山西", city_not: "太原", isp: "电信" },
   { id: 5, name: "山西其他城市联通", province: "山西", city_not: "太原", isp: "联通" },
@@ -191,13 +191,16 @@ async function runAllTests() {
     teardownTestEnv();
   });
 
-  testCase("测试 13: 同档位组播源权重优先于更新时间与节目数", () => {
+  testCase("测试 13: 同档位源类型优先：组播 > 咪咕 > 酒店", () => {
     const list = [
       { p: "h1", t: "hotel", type: "山西太原酒店 山西电信", count: 120, update_time: "2026-10-13 12:00:00" },
+      { p: "g1", t: "migu", type: "广东深圳咪咕 广东电信", count: 651, update_time: "2026-10-13 10:00:00" },
       { p: "m1", t: "multicast", type: "山西太原组播 山西电信", count: 80, update_time: "2026-10-13 08:00:00" }
     ];
     const sorted = sortCandidates(list);
     assert.strictEqual(sorted[0].p, "m1");
+    assert.strictEqual(sorted[1].p, "g1");
+    assert.strictEqual(sorted[2].p, "h1");
   });
 
   await testCaseAsync("测试 14: 优先在各档位挑选组播源（阶段 1 命中组播源）", async () => {
@@ -273,6 +276,7 @@ async function runAllTests() {
   testCase("测试 18: 新增档位省份解析，电信源优先一档", () => {
     const cases = [
       ["广东深圳咪咕 广东电信", "广东", 2],
+      ["广东惠州组播 广东电信", "广东", 2],
       ["河南郑州组播 河南电信", "河南", 11],
       ["河南郑州组播 河南联通", "河南", 12],
       ["吉林长春酒店 吉林电信", "吉林", 13],

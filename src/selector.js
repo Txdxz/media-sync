@@ -188,13 +188,26 @@ function isMulticastSource(source) {
  * 3. 更新时间相同，节目数降序；
  * 4. 仍相同，使用稳定标识 p 字典序升序。
  */
+function preferredSourceRank(source) {
+  if (!source) return 0;
+  const isMulti = source.t === 'multicast' ||
+    (source.type && source.type.includes('组播')) ||
+    (source.parsed && source.parsed.sourceType === '组播');
+  if (isMulti) return 2;
+  const isMigu = source.t === 'migu' ||
+    (source.type && source.type.includes('咪咕')) ||
+    (source.parsed && source.parsed.sourceType === '咪咕');
+  if (isMigu) return 1;
+  return 0;
+}
+
 function sortCandidates(candidates = []) {
   return [...candidates].sort((a, b) => {
-    // 1. 组播源优先
-    const isMultiA = isMulticastSource(a) ? 1 : 0;
-    const isMultiB = isMulticastSource(b) ? 1 : 0;
-    if (isMultiB !== isMultiA) {
-      return isMultiB - isMultiA;
+    // 1. 源类型优先：组播 > 咪咕 > 酒店/其他
+    const rankA = preferredSourceRank(a);
+    const rankB = preferredSourceRank(b);
+    if (rankB !== rankA) {
+      return rankB - rankA;
     }
 
     // 2. 更新时间降序

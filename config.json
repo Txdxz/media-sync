@@ -34,10 +34,9 @@
     },
     {
       "id": 2,
-      "name": "广东 电信 咪咕",
+      "name": "广东 电信 优先源",
       "province": "广东",
-      "isp": "电信",
-      "source_type": "咪咕"
+      "isp": "电信"
     },
     {
       "id": 3,
@@ -163,7 +162,7 @@
     "province_allowlist": [],
     "prefer_cities": [],
     "prefer_ips": [
-      "14.103.143.213"
+      "183.204.201.124"
     ]
   },
   "validation": {

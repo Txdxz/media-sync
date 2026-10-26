@@ -129,14 +129,35 @@ class SyncScheduler {
 
     const prevState = this.storage.loadState();
     const isFirstSuccess = !prevState.last_success_time;
-    const forceRefresh = /^(1|true)$/i.test(String(process.env.FORCE_REFRESH || '').trim());
+    const manualUpdate = /^(1|true)$/i.test(String(process.env.MANUAL_UPDATE || '').trim());
+    const forceRefresh = manualUpdate || /^(1|true)$/i.test(String(process.env.FORCE_REFRESH || '').trim());
     const previousSource = prevState.current_source;
     // 强制刷新：忽略上期源，走完整重选并重写订阅文件（用于恢复被冲掉的发布文件）
     const lastSource = forceRefresh ? null : previousSource;
     const previousTier = previousSource ? previousSource.tier : null;
 
-    if (forceRefresh) {
+    if (manualUpdate) {
+      console.log('🔄 手动换源：跳过沿用、排除当前源、忽略偏好，按优先级选下一个可用源。');
+    } else if (forceRefresh) {
       console.log('♻️ 已启用强制刷新：忽略上期沿用，执行完整重选。');
+    }
+
+    const selectionOptions = {
+      ...(this.config.selection || {}),
+      page_delay_min_ms: this.config.site && this.config.site.page_delay_min_ms,
+      page_delay_max_ms: this.config.site && this.config.site.page_delay_max_ms,
+      candidate_delay_min_ms: this.config.site && this.config.site.candidate_delay_min_ms,
+      candidate_delay_max_ms: this.config.site && this.config.site.candidate_delay_max_ms
+    };
+
+    if (manualUpdate) {
+      // 手动更新意味着对当前源不满意：忽略偏好并排除当前源，确保换一个
+      selectionOptions.prefer_ips = [];
+      selectionOptions.prefer_cities = [];
+      if (previousSource) {
+        selectionOptions.exclude_source_p = previousSource.p;
+        selectionOptions.exclude_source_ip = previousSource.ip;
+      }
     }
 
     try {
@@ -146,17 +167,13 @@ class SyncScheduler {
         this.config.priorities,
         lastSource,
         console.log,
-        {
-          ...(this.config.selection || {}),
-          page_delay_min_ms: this.config.site && this.config.site.page_delay_min_ms,
-          page_delay_max_ms: this.config.site && this.config.site.page_delay_max_ms,
-          candidate_delay_min_ms: this.config.site && this.config.site.candidate_delay_min_ms,
-          candidate_delay_max_ms: this.config.site && this.config.site.candidate_delay_max_ms
-        }
+        selectionOptions
       );
 
       if (!result) {
-        throw new Error(`所有 ${this.config.priorities.length} 个优先级档位均未能找到可用的订阅源`);
+        throw new Error(manualUpdate
+          ? '手动换源：没有找到除当前源之外的其他可用源，已保留原文件'
+          : `所有 ${this.config.priorities.length} 个优先级档位均未能找到可用的订阅源`);
       }
 
       const fixedUrl = buildSubscribeUrl({

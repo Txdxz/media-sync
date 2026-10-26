@@ -253,6 +253,15 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
     }
     return true;
   };
+  // 手动换源时排除当前源，确保会换到下一个可用源
+  const excludeSourceP = options.exclude_source_p ? String(options.exclude_source_p) : '';
+  const excludeSourceIp = options.exclude_source_ip ? String(options.exclude_source_ip) : '';
+  const isExcludedSource = (src) => {
+    if (!src) return false;
+    if (excludeSourceP && src.p === excludeSourceP) return true;
+    if (excludeSourceIp && src.ip === excludeSourceIp) return true;
+    return false;
+  };
   // 城市偏好：同档位内优先尝试指定城市，失败后仍会回退到同档位其他城市
   const preferCities = Array.isArray(options.prefer_cities) ? options.prefer_cities.map(String) : [];
   const preferIps = Array.isArray(options.prefer_ips) ? options.prefer_ips.map(String) : [];
@@ -474,6 +483,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
       const multicastCandidates = allSources.filter(src => {
         if (!isMulticastSource(src)) return false;
         if (!isAllowlisted(src.parsed)) return false;
+        if (isExcludedSource(src)) return false;
         const matchedTier = matchPriorityTier(src.parsed, [tier]);
         return matchedTier && matchedTier.id === tier.id;
       });
@@ -523,6 +533,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
     const allSources = await fetchCandidatesForProvince(provinceCode);
     const tierCandidates = allSources.filter(src => {
       if (!isAllowlisted(src.parsed)) return false;
+      if (isExcludedSource(src)) return false;
       const matchedTier = matchPriorityTier(src.parsed, [tier]);
       return matchedTier && matchedTier.id === tier.id;
     });

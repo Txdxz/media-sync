@@ -51,5 +51,5 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Content-Type: application/json" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/daily-sync.yml/dispatches" \
-            -d '{"ref":"main"}'
+            -d '{"ref":"main","inputs":{"manual_update":"true"}}'
           echo "已触发 daily-sync 工作流"

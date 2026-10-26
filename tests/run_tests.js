@@ -587,6 +587,23 @@ async function runAllTests() {
     }
   });
 
+  await testCaseAsync("测试 34: 手动换源会排除当前源并选择下一个", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const sources = [
+      { ip: "1.1.1.1", p: "cur", t: "multicast", count: 344, type: "广东惠州组播 广东电信", status: "新上线", update_time: "2026-10-25 11:01:29" },
+      { ip: "2.2.2.2", p: "alt", t: "multicast", count: 344, type: "广东深圳组播 广东电信", status: "新上线", update_time: "2026-10-25 10:00:00" }
+    ];
+    const mockClient = {
+      async fetchSourceList() { return { sources, pagination: { has_next_page: false } }; },
+      async fetchSourceDetail() { return { s: "s" }; },
+      async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,C\nhttp://x/1\n"; }
+    };
+    const byIp = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, exclude_source_ip: "1.1.1.1" });
+    assert.strictEqual(byIp.source.p, "alt");
+    const byP = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, exclude_source_p: "cur" });
+    assert.strictEqual(byP.source.p, "alt");
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

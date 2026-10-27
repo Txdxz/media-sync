@@ -1,5 +1,5 @@
 {
-  "last_run_time": "2026-10-26T15:51:14.157Z",
+  "last_run_time": "2026-10-27T15:07:32.744Z",
   "last_success_time": "2026-10-25T03:08:43.836Z",
   "consecutive_failures": 0,
   "current_source": {
@@ -17,8 +17,8 @@
       "province": "广东",
       "isp": "电信"
     },
-    "last_verified_at": "2026-10-26T15:51:14.157Z"
+    "last_verified_at": "2026-10-27T15:07:32.744Z"
   },
   "last_error": null,
-  "last_check_time": "2026-10-26T15:51:14.157Z"
+  "last_check_time": "2026-10-27T15:07:32.744Z"
 }

@@ -1,25 +1,24 @@
 {
-  "last_run_time": "2026-10-30T15:31:53.315Z",
-  "last_success_time": "2026-10-28T00:21:47.411Z",
+  "last_run_time": "2026-10-30T18:30:44.324Z",
+  "last_success_time": "2026-10-30T18:30:44.324Z",
   "consecutive_failures": 0,
   "current_source": {
-    "ip": "110.19.179.45",
-    "p": "iccemk466FOx8DhpFW9ieA",
+    "ip": "14.69.220.212",
+    "p": "Si7KYbrOqB-DdFnbH8VaDg",
     "t": "multicast",
-    "s": "QNOWmPDZfPQut4D3ddGyiQ",
-    "type": "山西太原组播 山西电信",
-    "count": 119,
-    "status": "存活1天",
-    "update_time": "2026-10-28 08:06:36",
+    "s": "YFVnPNpuRWo0pnjDC4ETpg",
+    "type": "广东深圳组播 广东电信",
+    "count": 344,
+    "status": "新上线",
+    "update_time": "2026-10-31 02:22:11",
     "tier": {
-      "id": 1,
-      "name": "山西太原 山西电信",
-      "province": "山西",
-      "city": "太原",
+      "id": 2,
+      "name": "广东 电信 优先源",
+      "province": "广东",
       "isp": "电信"
     },
-    "last_verified_at": "2026-10-30T15:31:53.315Z"
+    "last_verified_at": "2026-10-30T18:30:44.324Z"
   },
   "last_error": null,
-  "last_check_time": "2026-10-30T15:31:53.315Z"
+  "last_check_time": "2026-10-30T18:30:44.324Z"
 }

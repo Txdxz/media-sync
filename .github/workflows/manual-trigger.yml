@@ -15,9 +15,22 @@ jobs:
       github.event.issue.pull_request == null &&
       github.event.comment.user.login == github.repository_owner &&
       github.event.comment.user.type == 'User' &&
-      github.event.comment.body == '/update'
+      startsWith(github.event.comment.body, '/update')
     runs-on: ubuntu-latest
     steps:
+      - name: Parse region
+        id: parse
+        env:
+          BODY: ${{ github.event.comment.body }}
+        run: |
+          set -euo pipefail
+          REGION=$(printf '%s' "$BODY" | sed -E 's#^/update[[:space:]]*##' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')
+          case "$REGION" in
+            山西|广东|河南|吉林|内蒙古|江苏|安徽|天津|北京|上海|陕西|重庆|"") ;;
+            *) REGION="" ;;
+          esac
+          echo "region=$REGION" >> "$GITHUB_OUTPUT"
+
       - name: Cooldown check
         id: cooldown
         env:
@@ -44,12 +57,18 @@ jobs:
         if: steps.cooldown.outputs.allowed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          REGION: ${{ steps.parse.outputs.region }}
         run: |
           set -euo pipefail
+          if [ -n "${REGION}" ]; then
+            PAYLOAD=$(printf '{"ref":"main","inputs":{"manual_update":"true","region":"%s"}}' "${REGION}")
+          else
+            PAYLOAD='{"ref":"main","inputs":{"manual_update":"true"}}'
+          fi
           curl -fsS -X POST \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             -H "Content-Type: application/json" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/daily-sync.yml/dispatches" \
-            -d '{"ref":"main","inputs":{"manual_update":"true"}}'
-          echo "已触发 daily-sync 工作流"
+            -d "${PAYLOAD}"
+          echo "已触发 daily-sync 工作流${REGION:+（限定地区：${REGION}）}"

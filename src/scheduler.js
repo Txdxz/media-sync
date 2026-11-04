@@ -158,6 +158,12 @@ class SyncScheduler {
         selectionOptions.exclude_source_p = previousSource.p;
         selectionOptions.exclude_source_ip = previousSource.ip;
       }
+      // 可选：/update 山西、/update 广东 限定地区
+      const manualRegion = String(process.env.REGION || '').trim();
+      if (manualRegion) {
+        selectionOptions.province_allowlist = [manualRegion];
+        console.log(`🎯 手动换源限定地区：${manualRegion}`);
+      }
     }
 
     try {

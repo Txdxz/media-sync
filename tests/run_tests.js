@@ -604,6 +604,23 @@ async function runAllTests() {
     assert.strictEqual(byP.source.p, "alt");
   });
 
+  await testCaseAsync("测试 35: 手动换源限定地区（/update 山西 / 广东）", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const sources = [
+      { ip: "1.1.1.1", p: "gd", t: "multicast", count: 344, type: "广东惠州组播 广东电信", status: "新上线", update_time: "2026-10-31 10:00:00" },
+      { ip: "2.2.2.2", p: "sx", t: "multicast", count: 185, type: "山西晋中组播 山西联通", status: "新上线", update_time: "2026-10-31 09:00:00" }
+    ];
+    const mockClient = {
+      async fetchSourceList() { return { sources, pagination: { has_next_page: false } }; },
+      async fetchSourceDetail() { return { s: "s" }; },
+      async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,C\nhttp://x/1\n"; }
+    };
+    const gd = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, province_allowlist: ["广东"] });
+    assert.strictEqual(gd.source.p, "gd");
+    const sx = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, province_allowlist: ["山西"] });
+    assert.strictEqual(sx.source.p, "sx");
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

@@ -621,6 +621,59 @@ async function runAllTests() {
     assert.strictEqual(sx.source.p, "sx");
   });
 
+  testCase("测试 36: 失败源负缓存累计与过期", () => {
+    setupTestEnv();
+    const storage = new StorageManager({ data_dir: TEST_DIR, current_m3u_file: path.join(TEST_DIR, "c.m3u"), state_file: path.join(TEST_DIR, "s.json"), history_dir: path.join(TEST_DIR, "h") });
+    storage.recordBadSources({ "p|multicast": { ip: "1.1.1.1", type: "x", reason: "probe" } });
+    assert.strictEqual(storage.getBadSources(24)["p|multicast"].failCount, 1);
+    storage.recordBadSources({ "p|multicast": { ip: "1.1.1.1", type: "x", reason: "probe" } });
+    assert.strictEqual(storage.getBadSources(24)["p|multicast"].failCount, 2);
+
+    const st = storage.loadState();
+    st.bad_sources["old|multicast"] = { ts: new Date(Date.now() - 25 * 3600 * 1000).toISOString(), failCount: 5 };
+    storage.saveState(st);
+    assert.ok(!storage.getBadSources(24)["old|multicast"]);
+    teardownTestEnv();
+  });
+
+  await testCaseAsync("测试 37: 失败源负缓存会被跳过", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const sources = [
+      { ip: "1.1.1.1", p: "bad", t: "multicast", count: 344, type: "广东惠州组播 广东电信", status: "新上线", update_time: "2026-11-04 11:00:00" },
+      { ip: "2.2.2.2", p: "good", t: "multicast", count: 344, type: "广东深圳组播 广东电信", status: "新上线", update_time: "2026-11-04 10:00:00" }
+    ];
+    const mockClient = {
+      async fetchSourceList() { return { sources, pagination: { has_next_page: false } }; },
+      async fetchSourceDetail() { return { s: "s" }; },
+      async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,C\nhttp://x/1\n"; }
+    };
+    const res = await selectOptimalSource(mockClient, validator, mockPriorities, null, () => {}, { prefer_multicast: true, bad_sources: { "bad|multicast": { failCount: 2 } } });
+    assert.strictEqual(res.source.p, "good");
+  });
+
+  await testCaseAsync("测试 38: 升级稳定门槛阻止短暂新上线源", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const makeMock = (status) => ({
+      async checkSourceStillAlive() { return { isAlive: true, status: "存活4天", s: "sgd" }; },
+      async fetchSourceList({ province }) {
+        if (province === "sx") {
+          return { sources: [{ ip: "1.1.1.1", p: "p1", t: "multicast", count: 119, type: "山西太原组播 山西电信", status, update_time: "2026-11-04 10:00:00" }], pagination: { has_next_page: false } };
+        }
+        return { sources: [], pagination: { has_next_page: false } };
+      },
+      async fetchSourceDetail() { return { s: "s" }; },
+      async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,C\nhttp://x/1\n"; }
+    });
+    const last = { ip: "9.9.9.9", p: "gd", t: "multicast", type: "广东深圳组播 广东电信", status: "存活3天", count: 344, tier: { id: 2, name: "广东 电信 优先源" } };
+    const unstable = await selectOptimalSource(makeMock("新上线"), validator, mockPriorities, last, () => {}, { prefer_multicast: true, min_upgrade_stability_days: 2 });
+    assert.strictEqual(unstable.isRetained, true);
+    assert.strictEqual(unstable.source.p, "gd");
+    const stable = await selectOptimalSource(makeMock("存活3天"), validator, mockPriorities, last, () => {}, { prefer_multicast: true, min_upgrade_stability_days: 2 });
+    assert.strictEqual(stable.isRetained, false);
+    assert.strictEqual(stable.tier.id, 1);
+    assert.strictEqual(stable.source.p, "p1");
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

@@ -262,6 +262,9 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
     if (excludeSourceIp && src.ip === excludeSourceIp) return true;
     return false;
   };
+  // 失败源负缓存：近期多次校验失败的源直接跳过
+  const badSources = options.bad_sources && typeof options.bad_sources === 'object' ? options.bad_sources : {};
+  const isBadSource = (src) => Boolean(src && badSources[`${src.p}|${src.t}`]);
   // 城市偏好：同档位内优先尝试指定城市，失败后仍会回退到同档位其他城市
   const preferCities = Array.isArray(options.prefer_cities) ? options.prefer_cities.map(String) : [];
   const preferIps = Array.isArray(options.prefer_ips) ? options.prefer_ips.map(String) : [];
@@ -294,6 +297,23 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
   // 阶段 1 只探测该索引之前的档位（用于上期组播源的向上升级探测）
   let stage1TierLimit = prioritiesConfig.length;
   const prevTier = lastSelectedSource && lastSelectedSource.tier ? lastSelectedSource.tier : null;
+
+  // 升级稳定门槛：避免更高档位源只是短暂“新上线”就被自动切过去
+  const minUpgradeStabilityDays = options.min_upgrade_stability_days !== undefined
+    ? (Number(options.min_upgrade_stability_days) || 0)
+    : 0;
+  const statusDays = (status) => {
+    const s = String(status || '');
+    if (s === '新上线') return 0;
+    const m = s.match(/^存活(\d+)天$/);
+    return m ? parseInt(m[1], 10) : -1;
+  };
+  const isUpgradeTier = (tier) => Boolean(prevTier && prevTier.id !== undefined && tier && tier.id < prevTier.id);
+  const passesUpgradeStability = (candidate, tier) => {
+    if (minUpgradeStabilityDays <= 0) return true;
+    if (!isUpgradeTier(tier)) return true;
+    return statusDays(candidate.status) >= minUpgradeStabilityDays;
+  };
 
   function findTierIndex(source) {
     if (source && source.tier && source.tier.id !== undefined) {
@@ -465,9 +485,15 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
         };
       } else {
         logger(`[Selector] ❌ 候选源验证未通过: ${validationResult.reason}`);
+        if (typeof options.on_candidate_rejected === 'function') {
+          options.on_candidate_rejected(candidate, tier, validationResult.reason);
+        }
       }
     } catch (err) {
       logger(`[Selector] ❌ 候选源处理异常: ${err.message}`);
+      if (typeof options.on_candidate_rejected === 'function') {
+        options.on_candidate_rejected(candidate, tier, err.message);
+      }
     }
     return null;
   }
@@ -484,6 +510,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
         if (!isMulticastSource(src)) return false;
         if (!isAllowlisted(src.parsed)) return false;
         if (isExcludedSource(src)) return false;
+        if (isBadSource(src)) return false;
         const matchedTier = matchPriorityTier(src.parsed, [tier]);
         return matchedTier && matchedTier.id === tier.id;
       });
@@ -497,6 +524,10 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
             const delay = getRandomDelay(candidateDelayMinMs, candidateDelayMaxMs);
             logger(`[Selector] 候选源校验休眠 ${delay}ms (模拟点击间隔，避开频率风控)...`);
             await sleep(delay);
+          }
+          if (!passesUpgradeStability(cand, tier)) {
+            logger(`[Selector] ⏸️ 跳过升级 [P${tier.id}] ${cand.type}：状态「${cand.status}」未达到稳定门槛 ${minUpgradeStabilityDays} 天`);
+            continue;
           }
           logger(`[Selector] [P${tier.id} 组播候选 ${i + 1}/${sorted.length}] 验证 IP=${cand.ip}, 状态=${cand.status}, 节目数=${cand.count}, 更新时间=${cand.update_time}`);
           const res = await testCandidate(cand, tier);
@@ -534,6 +565,7 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
     const tierCandidates = allSources.filter(src => {
       if (!isAllowlisted(src.parsed)) return false;
       if (isExcludedSource(src)) return false;
+      if (isBadSource(src)) return false;
       const matchedTier = matchPriorityTier(src.parsed, [tier]);
       return matchedTier && matchedTier.id === tier.id;
     });
@@ -552,6 +584,10 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
         const delay = getRandomDelay(candidateDelayMinMs, candidateDelayMaxMs);
         logger(`[Selector] 候选源校验休眠 ${delay}ms (模拟点击间隔，避开频率风控)...`);
         await sleep(delay);
+      }
+      if (!passesUpgradeStability(cand, tier)) {
+        logger(`[Selector] ⏸️ 跳过升级 [P${tier.id}] ${cand.type}：状态「${cand.status}」未达到稳定门槛 ${minUpgradeStabilityDays} 天`);
+        continue;
       }
       logger(`[Selector] [P${tier.id} 候选 ${i + 1}/${sorted.length}] 验证 IP=${cand.ip}, 状态=${cand.status}, 节目数=${cand.count}, 更新时间=${cand.update_time}`);
       const res = await testCandidate(cand, tier);

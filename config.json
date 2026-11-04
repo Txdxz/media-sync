@@ -163,7 +163,8 @@
     "prefer_cities": [],
     "prefer_ips": [
       "183.204.201.124"
-    ]
+    ],
+    "min_upgrade_stability_days": 2
   },
   "validation": {
     "enable_stream_probe": true,

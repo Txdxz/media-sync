@@ -166,6 +166,27 @@ class SyncScheduler {
       }
     }
 
+    // 失败源负缓存：24 小时内失败 >=2 次的源跳过
+    const rejectedSources = {};
+    try {
+      const cachedBad = this.storage.getBadSources(24);
+      const effectiveBad = {};
+      for (const [key, entry] of Object.entries(cachedBad)) {
+        if (entry && (entry.failCount || 0) >= 2) effectiveBad[key] = entry;
+      }
+      selectionOptions.bad_sources = effectiveBad;
+    } catch (e) {
+      console.warn(`读取失败源缓存出错: ${e.message}`);
+    }
+    selectionOptions.on_candidate_rejected = (candidate, tier, reason) => {
+      if (!candidate || !candidate.p) return;
+      rejectedSources[`${candidate.p}|${candidate.t}`] = { ip: candidate.ip, type: candidate.type, reason };
+    };
+    if (manualUpdate) {
+      // 手动换源允许立即切换，不受“升级稳定门槛”限制
+      selectionOptions.min_upgrade_stability_days = 0;
+    }
+
     try {
       const result = await selectOptimalSource(
         this.client,
@@ -277,6 +298,11 @@ class SyncScheduler {
 
       return { success: false, error: err.message };
     } finally {
+      try {
+        this.storage.recordBadSources(rejectedSources);
+      } catch (e) {
+        console.warn(`写入失败源缓存出错: ${e.message}`);
+      }
       this.storage.releaseLock();
       this.isRunning = false;
     }

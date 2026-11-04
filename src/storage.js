@@ -148,6 +148,53 @@ class StorageManager {
     return mergedSource;
   }
 
+  /**
+   * 读取失败源缓存（默认 24 小时内有效）
+   */
+  getBadSources(maxAgeHours = 24) {
+    const state = this.loadState();
+    const bad = state.bad_sources || {};
+    const cutoff = Date.now() - maxAgeHours * 3600 * 1000;
+    const out = {};
+    for (const [key, entry] of Object.entries(bad)) {
+      const ts = Date.parse(entry && entry.ts);
+      if (!ts || ts >= cutoff) out[key] = entry;
+    }
+    return out;
+  }
+
+  /**
+   * 记录本轮校验失败的源；累计失败次数，24 小时后自动过期。
+   */
+  recordBadSources(entries = {}, maxAgeHours = 24) {
+    const keys = Object.keys(entries || {});
+    if (keys.length === 0) return;
+    const now = new Date().toISOString();
+    const state = this.loadState();
+    const bad = state.bad_sources || {};
+
+    for (const key of keys) {
+      const item = entries[key] || {};
+      const prev = bad[key] || {};
+      bad[key] = {
+        ts: now,
+        failCount: (prev.failCount || 0) + (item.failCount || 1),
+        ip: item.ip || prev.ip || '',
+        type: item.type || prev.type || '',
+        reason: String(item.reason || prev.reason || '').slice(0, 160)
+      };
+    }
+
+    const cutoff = Date.now() - maxAgeHours * 3600 * 1000;
+    for (const [key, entry] of Object.entries(bad)) {
+      const ts = Date.parse(entry && entry.ts);
+      if (!ts || ts < cutoff) delete bad[key];
+    }
+
+    state.bad_sources = bad;
+    this.saveState(state);
+  }
+
   _rotateHistoryFiles() {
     try {
       const files = fs.readdirSync(this.historyDir)

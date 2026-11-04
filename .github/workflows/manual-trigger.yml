@@ -29,7 +29,14 @@ jobs:
             山西|广东|河南|吉林|内蒙古|江苏|安徽|天津|北京|上海|陕西|重庆|"") ;;
             *) REGION="" ;;
           esac
+          VALID=true
+          if [ -z "$REGION" ]; then
+            if ! printf '%s' "$BODY" | grep -Eq '^/update[[:space:]]*$'; then
+              VALID=false
+            fi
+          fi
           echo "region=$REGION" >> "$GITHUB_OUTPUT"
+          echo "valid=${VALID}" >> "$GITHUB_OUTPUT"
 
       - name: Cooldown check
         id: cooldown
@@ -54,7 +61,7 @@ jobs:
           fi
 
       - name: Dispatch daily sync
-        if: steps.cooldown.outputs.allowed == 'true'
+        if: steps.cooldown.outputs.allowed == 'true' && steps.parse.outputs.valid == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           REGION: ${{ steps.parse.outputs.region }}

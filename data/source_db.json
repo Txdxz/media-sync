@@ -1,0 +1,1868 @@
+{
+  "generatedAt": "2026-11-14T11:23:36.770Z",
+  "count": 1,
+  "sources": [
+    {
+      "id": "0bf43b053685",
+      "ip": "127.0.0.1",
+      "port": 0,
+      "realHost": "local",
+      "t": "multicast",
+      "type": "本地备用",
+      "parsed": {
+        "raw": "本地备用",
+        "province": "",
+        "city": "",
+        "isp": "",
+        "sourceType": "其他"
+      },
+      "channelCount": 184,
+      "channels": [
+        {
+          "name": "北京卫视4K",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.155:9172",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": true
+        },
+        {
+          "name": "东方卫视4K",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.1.248:2121",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": true
+        },
+        {
+          "name": "广东卫视4K",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.1.245:2120",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": true
+        },
+        {
+          "name": "深圳卫视4K",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.1.244:2119",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": true
+        },
+        {
+          "name": "湖南卫视4K",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.1.246:2125",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": true
+        },
+        {
+          "name": "山东卫视4K",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.1.251:2124",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": true
+        },
+        {
+          "name": "四川卫视4K",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.1.250:2126",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": true
+        },
+        {
+          "name": "浙江卫视4K",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.1.247:2123",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": true
+        },
+        {
+          "name": "江苏卫视4K",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.1.249:2122",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": true
+        },
+        {
+          "name": "CCTV1HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.153:9136",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV2HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.154:9144",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV3HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.208:9576",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV4HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.156:9160",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV5HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.209:9584",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV5+HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.168:9256",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV6HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.210:9592",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV7HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.159:9184",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV8HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.211:9600",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV9HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.161:9200",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV10HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.162:9208",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV12HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.164:9224",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV13HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.165:9232",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV14HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.166:9240",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV16HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.169:9264",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV17HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.170:9272",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CETV1HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.181:9360",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CETV早期教育HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.99:8704",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CHC影迷电影HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.93:8004",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CHC家庭影院HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.240:9820",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CHC动作电影HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.94:8012",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "山西文体生活HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.16:8040",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "山西文体生活HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.237:9808",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "山西社会与法治HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.238:9816",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "山西经济与科技HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.236:9800",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "山西黄河HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.235:9792",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "清徐HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.191:9440",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "第一剧场HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.221:9680",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "风云剧场HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.227:9728",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "风云足球HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.225:9712",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "风云音乐HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.220:9672",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "世界地理HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.222:9688",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "电视指南HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.218:9656",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "怀旧剧场HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.224:9704",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "兵器科技HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.223:9696",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "女性时尚HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.226:9720",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "高尔夫网球HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.217:9648",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "央视台球HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.216:9640",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "央视文化精品HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.219:9664",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "梨园频道HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.115:8832",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "法治天地HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.83:8576",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "游戏风云HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.78:8536",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "茶频道HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.213:9616",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "武术世界HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.97:8688",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "金鹰纪实HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.194:9464",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "文物宝库HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.110:8792",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "快乐垂钓HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.214:9624",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "生活时尚HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.84:8584",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "中国天气HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.103:8736",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "乐游HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.77:8528",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "动漫秀场HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.183:9376",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "重庆卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.174:9304",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "江苏卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.176:9320",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "浙江卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.144:9064",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "东方卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.175:9312",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "深圳卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.147:9088",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "北京卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.177:9328",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "山东卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.149:9104",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "天津卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.148:9096",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "贵州卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.180:9352",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "四川卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.179:9344",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "广西卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.231:9760",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "黑龙江卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.151:9120",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "安徽卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.145:9072",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "山西卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.152:9128",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "江西卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.54:8344",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "湖北卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.150:9112",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "旅游卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.212:9608",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "东南卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.188:9416",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "吉林卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.58:8376",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "辽宁卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.173:9296",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "湖南卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.143:9056",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "广东卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.146:9080",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "河南卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.52:8328",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "河北卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.178:9336",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "宁夏卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.64:8424",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "甘肃卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.55:8352",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "新疆卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.67:8448",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "西藏卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.66:8440",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "兵团卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.62:8408",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "金鹰卡通HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.172:9288",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "哈哈炫动HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.44:8264",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "卡酷少儿HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.57:8368",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "山东教育卫视HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.130:8952",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "北京纪实科教HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.141:9040",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "东方财经HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.76:8520",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "都市剧场HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.81:8560",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "九屏测试HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.197:9488",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "四海钓鱼HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.123:8896",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "大同教育HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.232:9772",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "金色学堂HD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.182:9368",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": true,
+          "is4K": false
+        },
+        {
+          "name": "CCTV1SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.18:8056",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV2SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.19:8064",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV3SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.20:8072",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV4SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.21:8080",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV5SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.22:8088",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV6SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.23:8096",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV7SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.24:8104",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV8SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.25:8112",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV9SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.26:8120",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV10SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.27:8128",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV11SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.28:8136",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV12SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.29:8144",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV13SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.30:8152",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV14SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.31:8160",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV15SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.32:8168",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CCTV17SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.207:9568",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CETV2SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.69:8464",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CETV4SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.70:8472",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "山西影视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.14:8024",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "山西文体生活SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.190:9432",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "山西社会与法治SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.15:8032",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "山西黄河SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.12:8008",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "太原1SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.201:9520",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "太原2SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.202:9528",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "太原3SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.203:9536",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "太原4SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.204:9544",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "太原5SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.205:9552",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "太原佰乐购SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.215:9632",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "太原教育SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.206:9560",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "古交电视台SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.192:9448",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "晋能控股SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.229:9744",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "朔州-1SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.185:9392",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "朔州-2SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.186:9400",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "经济与科技SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.13:8016",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "阳曲SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.196:9480",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "阳泉科教SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.234:9784",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "阳泉综合SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.233:9776",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "中视购物SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.72:8488",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "书法频道SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.102:8728",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "环球奇观SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.111:8800",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "国学频道SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.116:8840",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "环球旅游SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.127:8928",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "生态环境SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.120:8872",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "新动漫SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.73:8496",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "优优宝贝SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.119:8864",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "先锋乒羽SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.121:8880",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "重庆卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.50:8312",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "江苏卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.38:8216",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "浙江卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.36:8200",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "东方卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.34:8184",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "深圳卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.47:8288",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "北京卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.39:8224",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "山东卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.51:8320",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "天津卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.56:8360",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "贵州卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.43:8256",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "四川卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.42:8248",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "云南卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.60:8392",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "广西卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.46:8280",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "黑龙江卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.48:8296",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "安徽卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.37:8208",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "山西卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.11:8000",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "山西卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.189:9424",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "江西卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.198:9496",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "湖北卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.49:8304",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "旅游卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.61:8400",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "陕西卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.53:8336",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "东南卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.40:8232",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "吉林卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.199:9504",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "辽宁卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.35:8192",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "内蒙古卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.63:8416",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "湖南卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.33:8176",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "广东卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.45:8272",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "河南卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.195:9472",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "河北卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.65:8432",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "青海卫视SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.59:8384",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "金鹰卡通SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.41:8240",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "重庆汽摩SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.95:8672",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "央广购物SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.230:9752",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "优购物SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.131:8960",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "聚鲨环球精选SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.122:8888",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "CEV1SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.68:8456",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "中华特产SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.128:8936",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "收藏天下SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.132:8968",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        },
+        {
+          "name": "老故事SD",
+          "tvgId": "",
+          "group": "",
+          "url": "http://192.168.5.2:5140/rtp/226.0.2.112:8808",
+          "source": "local-golden",
+          "isMulticastUrl": true,
+          "isHd": false,
+          "is4K": false
+        }
+      ],
+      "status": "本地可用",
+      "updateTime": "2026-11-14T11:23:36.769Z",
+      "origin": "local-file",
+      "filePath": "/Users/guest/工作/IPTV/data/backup/playlist.m3u"
+    }
+  ]
+}

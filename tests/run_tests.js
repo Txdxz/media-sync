@@ -699,6 +699,35 @@ async function runAllTests() {
     assert.strictEqual(gd.count, 2);
   });
 
+  await testCaseAsync("测试 40: 复刻站同构接口可被原 client 直接使用", async () => {
+    const { ReplicaSite } = require("../src/site");
+    const { fromLocalM3u } = require("../src/source-db");
+    const fs = require("fs");
+    const os = require("os");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "replica-"));
+    const file = path.join(tmp, "p.m3u");
+    fs.writeFileSync(file, "#EXTM3U\n#EXTINF:-1 group-title=\"广东惠州组播 广东电信\",CCTV1HD\nhttp://1.1.1.1/rtp/239.1.1.1:1000\n#EXTINF:-1 group-title=\"广东惠州组播 广东电信\",CCTV2HD\nhttp://1.1.1.1/rtp/239.1.1.2:1001\n");
+    const src = fromLocalM3u(file, { host: "1.2.3.4", ip: "1.2.3.4", t: "multicast" });
+    assert.ok(src);
+    assert.strictEqual(src.channelCount, 2);
+
+    const m3u = fs.readFileSync(file, "utf8");
+    const site = new ReplicaSite({ port: 18111, sourceDb: [src], m3uProvider: () => m3u, logger: () => {} });
+    await site.start();
+    try {
+      const SourceClient = require("../src/client");
+      const c = new SourceClient({ base_urls: ["http://127.0.0.1:18111/index.php"], index_path: "", request_timeout_ms: 5000, logger: () => {} });
+      const list = await c.fetchSourceList({ province: "all", limit: 10, page: 1 });
+      assert.strictEqual(list.sources.length, 1);
+      assert.strictEqual(list.sources[0].count, 2);
+      const m = await c.fetchM3UContent(list.sources[0].p, list.sources[0].t);
+      assert.strictEqual((m.match(/^#EXTINF/gm) || []).length, 2);
+    } finally {
+      await site.stop();
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

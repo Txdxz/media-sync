@@ -31,7 +31,7 @@
 
 ## 三、测试与健康校验
 
-执行 npm test，全部 39 项用例 100% 通过：
+执行 npm test，全部 40 项用例 100% 通过：
 - 严格规则隔离校验
 - 节点档位权重与多关键字匹配
 - 状态过滤规则 (新上线/存活状态识别)
@@ -60,7 +60,18 @@
 - **扫描引擎骨架**：`scan/` 目录，可探测 udpxy 端点并生成候选源池（`data/scan_pool.json`），详见 `scan/README.md`。
 - **本地快照**：历史 M3U 保存在 `data/history/`，源站全挂时线上文件保持不变。
 
-## 五、手动立即更新
+## 五、复刻站（同构替代）
+
+原站宕机时可用自建源库对外提供**接口同构**的替代站，详见 `docs/replica.md`：
+
+```bash
+node src/build-db.js              # 构建源库（本地黄金源 + 扫描池）
+PORT=8090 node src/replica-cli.js # 启动复刻站
+```
+
+兼容 `index.php?province=...&limit=...&page=...`、详情、M3U 三种请求，可加入 `site.base_urls` 作为备源。
+
+## 六、手动立即更新
 
 在仓库置顶 Issue 下评论 `/update`，即可立即触发一次**手动换源**：
 

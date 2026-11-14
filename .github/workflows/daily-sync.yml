@@ -119,11 +119,15 @@ jobs:
           # 自动剔除可能误填的 .m3u 后缀，避免重复拼接为 .m3u.m3u
           CLEAN_KEY="${KEY%.m3u}"
 
-          # 同时生成带 .m3u 和不带后缀的文件，确保怎么输入都能正常访问
-          cp ./data/current.m3u "./public/${CLEAN_KEY}.m3u"
-          cp ./data/current.m3u "./public/${CLEAN_KEY}"
-          if [ -f "./data/state.json" ]; then
-            cp ./data/state.json "./public/${CLEAN_KEY}_status.json"
+          # 原站源（A 线）：存在才发布，避免原站宕机时 cp 失败阻断整条流水线
+          if [ -s ./data/current.m3u ]; then
+            cp ./data/current.m3u "./public/${CLEAN_KEY}.m3u"
+            cp ./data/current.m3u "./public/${CLEAN_KEY}"
+            if [ -f "./data/state.json" ]; then
+              cp ./data/state.json "./public/${CLEAN_KEY}_status.json"
+            fi
+          else
+            echo "::warning::本次无原站源，仅发布自建源"
           fi
 
           # 自建源（B 线）：由情报采集的 source_db 生成，独立文件名，不依赖原站

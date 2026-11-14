@@ -1,0 +1,39 @@
+name: Province Source Collect
+
+on:
+  schedule:
+    # 每天北京时间 10:30（UTC 02:30），低频采集各省源
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "province-collect"
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Collect endpoints
+        run: node scan/endpoint-db.js
+      - name: Probe endpoints (cloud)
+        run: node scan/probe-endpoints.js
+      - name: Commit collected db
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          for f in data/endpoint_db.json data/endpoint_probe.json; do
+            if [ -f "$f" ]; then git add "$f"; fi
+          done
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(collect): update province endpoints [skip ci]"
+            git push origin main || (git pull --rebase origin main && git push origin main)
+          fi

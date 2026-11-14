@@ -13,7 +13,8 @@
     "base_urls": [
       "https://iptv.cqshushu.com"
     ],
-    "backup_m3u_urls": []
+    "backup_m3u_urls": [],
+    "backup_m3u_file": "./data/backup/playlist.m3u"
   },
   "server": {
     "port": 8088,

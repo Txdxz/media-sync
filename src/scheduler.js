@@ -114,9 +114,29 @@ class SyncScheduler {
    * 仅在选源完全失败时使用，且必须通过格式校验，绝不覆盖为坏文件
    */
   async _loadBackupM3u() {
+    const backupValidator = new M3uValidator({ ...(this.config.validation || {}), enable_stream_probe: false });
+
+    // 1) 优先读本地备用文件（适合内网地址，GitHub 拉不到但本机/家用设备能读）
+    const localPath = this.config.site && this.config.site.backup_m3u_file;
+    if (localPath) {
+      try {
+        if (fs.existsSync(localPath)) {
+          const text = fs.readFileSync(localPath, 'utf8');
+          const result = await backupValidator.validate(text, { sourceIp: '', sourceName: '本地备用文件' });
+          if (result.isValid) {
+            console.log(`[Scheduler] ✅ 主源不可用，使用本地备用文件: ${localPath} (${result.channelCount} 频道)`);
+            return { m3u: result.normalizedM3u, count: result.channelCount, url: localPath };
+          }
+          console.warn(`[Scheduler] 本地备用文件校验未通过 ${localPath}: ${result.reason}`);
+        }
+      } catch (e) {
+        console.warn(`[Scheduler] 本地备用文件读取失败 ${localPath}: ${e.message.slice(0, 100)}`);
+      }
+    }
+
+    // 2) 再尝试远程备用 M3U 列表
     const urls = (this.config.site && this.config.site.backup_m3u_urls) || [];
     if (!Array.isArray(urls) || urls.length === 0) return null;
-    const backupValidator = new M3uValidator({ ...(this.config.validation || {}), enable_stream_probe: false });
     for (const rawUrl of urls) {
       const url = String(rawUrl || '').trim();
       if (!url) continue;

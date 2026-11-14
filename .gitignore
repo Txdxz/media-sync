@@ -5,3 +5,6 @@ data/test_env/
 public/
 .DS_Store
 *.log
+
+# 本地备用播放列表（内网地址，仅本地使用，不提交）
+data/backup/

@@ -56,6 +56,7 @@
 
 - **多源兜底**：`config.json` 的 `site.base_urls` 可配置多个源站，主站 5xx/超时时自动切换下一个（需同构 API）。
 - **备用 M3U 兜底**：`site.backup_m3u_urls` 填 1~N 个静态 M3U 地址；主源站全挂、选源失败时自动改用备用列表（通过格式校验才发布，绝不写坏文件）。
+- **本地备用文件**：`site.backup_m3u_file`（默认 `./data/backup/playlist.m3u`）适合内网地址；优先于远程备用列表，仅本机可读，已加入 .gitignore。
 - **扫描引擎骨架**：`scan/` 目录，可探测 udpxy 端点并生成候选源池（`data/scan_pool.json`），详见 `scan/README.md`。
 - **本地快照**：历史 M3U 保存在 `data/history/`，源站全挂时线上文件保持不变。
 

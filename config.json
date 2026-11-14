@@ -12,7 +12,8 @@
     "rate_limit_retry_delay_ms": 5000,
     "base_urls": [
       "https://iptv.cqshushu.com"
-    ]
+    ],
+    "backup_m3u_urls": []
   },
   "server": {
     "port": 8088,

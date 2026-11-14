@@ -110,6 +110,32 @@ class SyncScheduler {
   }
 
   /**
+   * 主源站全部不可用时的最后兜底：拉取预先配置的备用 M3U 列表
+   * 仅在选源完全失败时使用，且必须通过格式校验，绝不覆盖为坏文件
+   */
+  async _loadBackupM3u() {
+    const urls = (this.config.site && this.config.site.backup_m3u_urls) || [];
+    if (!Array.isArray(urls) || urls.length === 0) return null;
+    const backupValidator = new M3uValidator({ ...(this.config.validation || {}), enable_stream_probe: false });
+    for (const rawUrl of urls) {
+      const url = String(rawUrl || '').trim();
+      if (!url) continue;
+      try {
+        const res = await this.client._request(url, { isJson: false });
+        const result = await backupValidator.validate(res.body, { sourceIp: '', sourceName: '备用列表' });
+        if (result.isValid) {
+          console.log(`[Scheduler] ✅ 主源不可用，使用备用 M3U 列表: ${url} (${result.channelCount} 频道)`);
+          return { m3u: result.normalizedM3u, count: result.channelCount, url };
+        }
+        console.warn(`[Scheduler] 备用 M3U 校验未通过 ${url}: ${result.reason}`);
+      } catch (e) {
+        console.warn(`[Scheduler] 备用 M3U 拉取失败 ${url}: ${e.message.slice(0, 100)}`);
+      }
+    }
+    return null;
+  }
+
+  /**
    * 执行单次筛选任务
    */
   async runJob(triggerReason = 'manual') {
@@ -198,6 +224,39 @@ class SyncScheduler {
       );
 
       if (!result) {
+        // 最后兜底：主源站全挂时使用预设备用 M3U 列表
+        const backup = await this._loadBackupM3u();
+        if (backup) {
+          const backupMeta = {
+            ip: '',
+            p: '',
+            t: 'backup',
+            s: '',
+            type: '备用 M3U 列表',
+            count: backup.count,
+            status: '备用',
+            update_time: new Date().toISOString(),
+            tier: { id: 0, name: '备用列表' }
+          };
+          this.storage.atomicUpdateM3u(backup.m3u, backupMeta);
+          if (this.notifier.shouldNotify({ type: 'success', isSourceChanged: true })) {
+            await this.notifier.notifySuccess({
+              source: backupMeta,
+              tier: backupMeta.tier,
+              isRetained: false,
+              reason: `主源不可用，已切换到备用 M3U 列表（${backup.url}）`,
+              fixedSubscribeUrl: buildSubscribeUrl({
+                publicBaseUrl: process.env.PAGES_BASE_URL,
+                subscribeKey: process.env.SUBSCRIBE_KEY,
+                port: this.config.server.port,
+                route: this.config.server.m3u_route
+              }),
+              rawM3uUrl: backup.url,
+              channelCount: backup.count
+            });
+          }
+          return { success: true, backup: true, source: backupMeta };
+        }
         throw new Error(manualUpdate
           ? '手动换源：没有找到除当前源之外的其他可用源，已保留原文件'
           : `所有 ${this.config.priorities.length} 个优先级档位均未能找到可用的订阅源`);

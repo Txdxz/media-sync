@@ -52,7 +52,8 @@ jobs:
           MANUAL_UPDATE: ${{ inputs.manual_update }}
           REGION: ${{ inputs.region }}
         run: |
-          node src/cli.js --run-now
+          # 选源失败（如原站宕机）不阻断后续自建源发布
+          node src/cli.js --run-now || echo "::warning::原站选源失败，继续尝试发布自建源"
 
       - name: Commit State & Cleanup Git Tracked Files
         run: |

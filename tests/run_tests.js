@@ -443,7 +443,7 @@ async function runAllTests() {
       channelCount: 119
     });
     assert.ok(md.includes("维持 P3 山西其他城市电信"));
-    assert.ok(md.includes("沿用当前可用源"));
+    assert.ok(md.includes("自建源已更新"));
   });
 
   await testCaseAsync("测试 27: 上期源状态无法确认时保护性沿用，不触发降级重选", async () => {

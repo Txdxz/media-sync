@@ -13,6 +13,7 @@ const M3uServer = require('./server');
 const { selectOptimalSource } = require('./selector');
 const { describeTierChange } = require('./tier-change');
 const { buildSubscribeUrl } = require('./subscribe-url');
+const { buildPublishSummary } = require('./publish-summary');
 
 class SyncScheduler {
   constructor(configPath = path.resolve(__dirname, '../config.json')) {
@@ -175,6 +176,9 @@ class SyncScheduler {
 
     const prevState = this.storage.loadState();
     const isFirstSuccess = !prevState.last_success_time;
+    // 统计实际发布的自建源摘要（供通知展示）
+    let publishSummary = null;
+    try { publishSummary = buildPublishSummary(require('path').resolve(__dirname, '../data/source_db.json')); } catch (e) { /* ignore */ }
     const manualUpdate = /^(1|true)$/i.test(String(process.env.MANUAL_UPDATE || '').trim());
     const forceRefresh = manualUpdate || /^(1|true)$/i.test(String(process.env.FORCE_REFRESH || '').trim());
     const previousSource = prevState.current_source;
@@ -316,7 +320,8 @@ class SyncScheduler {
             tierChange: describeTierChange(previousTier || result.tier, result.tier, { isRetained: true }),
             fixedSubscribeUrl: fixedUrl,
             rawM3uUrl: result.source.s ? `${this.config.site.base_url}${this.config.site.index_path}?s=${result.source.s}&t=${result.source.t}&channels=1&format=m3u` : null,
-            channelCount: result.source.count
+            channelCount: result.source.count,
+            publishSummary
           });
         }
 
@@ -354,7 +359,8 @@ class SyncScheduler {
             tierChange: describeTierChange(previousTier, result.tier, { isRetained: false }),
             fixedSubscribeUrl: fixedUrl,
             rawM3uUrl: rawM3u,
-            channelCount: result.channelCount
+            channelCount: result.channelCount,
+            publishSummary
           });
         }
 

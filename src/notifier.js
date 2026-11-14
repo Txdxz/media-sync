@@ -46,11 +46,12 @@ class Notifier {
       fixedSubscribeUrl,
       rawM3uUrl,
       channelCount,
-      tierChange
+      tierChange,
+      publishSummary
     } = params;
 
     const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
-    const title = isRetained ? '📺 订阅源每日检查：沿用当前可用源' : '🎉 订阅源更新成功：已切换源';
+    const title = isRetained ? '📺 订阅源每日检查（原站沿用 + 自建源已更新）' : '🎉 订阅源更新成功（原站已切换 + 自建源已更新）';
 
     return [
       `### ${title}`,
@@ -68,6 +69,11 @@ class Notifier {
       reason ? `> **策略说明**：${reason}\n` : '',
       `> ⚠️ **注意**：「沿用」表示本次未换源，不代表上游一定可播；若电视打不开，请用下方自建源地址。`,
       '',
+      publishSummary ? `**【实际发布的自建源】**：` : '',
+      publishSummary ? `> 频道：**${publishSummary.channelCount}** 个（${Object.entries(publishSummary.groups).map(([k,v])=>`${k}${v}`).join(' / ')}）` : '',
+      publishSummary ? `> 覆盖省份：**${publishSummary.provinceCount}** 个（${publishSummary.provinces.join('、')}）` : '',
+      publishSummary ? `> 说明：自建源每天重新采集，不依赖 cqshushu；电视请用下方 _self 地址。` : '',
+      publishSummary ? '' : '',
       `**【当前生效订阅地址】**：`,
       `\`${fixedSubscribeUrl || '请查看服务配置'}\``,
       rawM3uUrl ? `\n[查看原始 M3U 接口](${rawM3uUrl})` : ''

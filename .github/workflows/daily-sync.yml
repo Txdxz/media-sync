@@ -43,6 +43,13 @@ jobs:
         with:
           node-version: 20
 
+      - name: Collect Self Sources
+        if: always()
+        run: |
+          # 采集自建源（情报聚合），失败不影响原站源发布
+          node scan/intel-collect.js || echo "::warning::情报采集失败，跳过自建源"
+          node scan/intel-to-db.js || echo "::warning::自建源库构建失败"
+
       - name: Run Source Selection
         env:
           QYWX_WEBHOOK_URL: ${{ secrets.QYWX_WEBHOOK_URL }}
@@ -69,13 +76,6 @@ jobs:
             # 与手动推送并发时先变基再推，避免 non-fast-forward 导致整个任务失败
             git push origin main || (git pull --rebase origin main && git push origin main)
           fi
-
-      - name: Collect Self Sources
-        if: always()
-        run: |
-          # 采集自建源（情报聚合），失败不影响原站源发布
-          node scan/intel-collect.js || echo "::warning::情报采集失败，跳过自建源"
-          node scan/intel-to-db.js || echo "::warning::自建源库构建失败"
 
       - name: Ensure Playlist Present
         id: playlist

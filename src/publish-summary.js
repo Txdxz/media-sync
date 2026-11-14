@@ -22,6 +22,7 @@ function buildPublishSummary(dbFile) {
     // 统计覆盖省份
     const provinces = new Set();
     for (const s of db) if (s.parsed && s.parsed.province) provinces.add(s.parsed.province);
+    if (!filtered.kept || filtered.kept <= 0) return null;
     return {
       channelCount: filtered.kept,
       groups,

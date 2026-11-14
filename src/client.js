@@ -410,7 +410,8 @@ class SourceClient {
     try {
       const detail = await this.fetchSourceDetail(p, t);
       if (!detail.status) {
-        return { isAlive: false, status: null, unknown: true, error: '详情页未解析到状态' };
+        // 源站能访问但详情页没有状态 => 源数据损坏，判定失效（不是网络问题）
+        return { isAlive: false, status: null, broken: true, error: '详情页未解析到状态' };
       }
       if (detail.status === '暂时失效') {
         return { isAlive: false, status: detail.status, s: detail.s, t: detail.t };
@@ -418,9 +419,14 @@ class SourceClient {
       const isAlive = detail.status === '新上线' || /^存活\d+天$/.test(detail.status);
       return { isAlive, status: detail.status, s: detail.s, t: detail.t };
     } catch (e) {
-      // 网络异常/超时并不等于源已失效，必须标记为「无法确认」，
-      // 交由上层做保护性沿用，避免因一次超时误触发降级重选。
-      return { isAlive: false, unknown: true, error: e.message };
+      const msg = e.message || '';
+      // 详情页缺 s 参数 = 源确实坏了（上游/索引失效），应判定失效并重新选源，
+      // 绝不能当成"网络异常"保护性沿用。
+      if (/Channel list parameter 's' not found/i.test(msg) || /详情页/.test(msg)) {
+        return { isAlive: false, status: null, broken: true, error: msg };
+      }
+      // 其余（超时/连接失败/5xx）才视为「无法确认」，交由上层保护性沿用。
+      return { isAlive: false, unknown: true, error: msg };
     }
   }
 }

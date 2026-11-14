@@ -751,6 +751,36 @@ async function runAllTests() {
     assert.ok(r.text.includes('group-title="央视"'));
   });
 
+  await testCaseAsync("测试 42: 源损坏(s缺失)判定失效并重新选源，不误报沿用", async () => {
+    const validator = new M3uValidator({ enable_stream_probe: false, min_channels_threshold: 1 });
+    const lastBroken = { ip: "1.1.1.1", p: "broken", t: "multicast", type: "广东东莞组播 广东电信", status: "存活9天", count: 344, tier: { id: 2, name: "广东 电信 优先源" } };
+    const mockClient = {
+      // 模拟 checkSourceStillAlive 已判定 broken
+      async checkSourceStillAlive() { return { isAlive: false, broken: true, error: "Channel list parameter 's' not found" }; },
+      async fetchSourceList({ province }) {
+        if (province === "gd") return { sources: [{ ip: "2.2.2.2", p: "new", t: "multicast", count: 300, type: "广东深圳组播 广东电信", status: "新上线", update_time: "2026-11-14 10:00:00" }], pagination: { has_next_page: false } };
+        return { sources: [], pagination: { has_next_page: false } };
+      },
+      async fetchSourceDetail() { return { s: "s" }; },
+      async fetchM3UContent() { return "#EXTM3U\n#EXTINF:-1,C\nhttp://x/1\n"; }
+    };
+    const res = await selectOptimalSource(mockClient, validator, mockPriorities, lastBroken, () => {}, { prefer_multicast: true });
+    assert.strictEqual(res.isRetained, false);
+    assert.strictEqual(res.source.p, "new");
+  });
+
+  testCase("测试 43: checkSourceStillAlive 区分 broken 与 unknown", () => {
+    const SourceClient = require("../src/client");
+    const c = new SourceClient({ base_urls: ["http://x"], logger: () => {} });
+    // s 缺失 => broken
+    c.fetchSourceDetail = async () => { throw new Error("Channel list parameter 's' not found in detail page for p=x"); };
+    // 直接测内部判定：模拟 catch 分支
+    return c.checkSourceStillAlive("p", "t").then((r) => {
+      assert.strictEqual(r.broken, true);
+      assert.ok(!r.unknown);
+    });
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

@@ -282,11 +282,13 @@ class SyncScheduler {
           : `所有 ${this.config.priorities.length} 个优先级档位均未能找到可用的订阅源`);
       }
 
+      // 通知里优先展示"自建源"地址：因为原站长期宕机时，实际发布的是自建源
       const fixedUrl = buildSubscribeUrl({
         publicBaseUrl: process.env.PAGES_BASE_URL,
         subscribeKey: process.env.SUBSCRIBE_KEY,
         port: this.config.server.port,
-        route: this.config.server.m3u_route
+        route: this.config.server.m3u_route,
+        suffix: '_self'
       });
 
       if (result.isRetained) {

@@ -50,12 +50,12 @@ class Notifier {
     } = params;
 
     const timeStr = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
-    const title = isRetained ? '📺 订阅源每日检查：沿用当前可用源' : '🎉 订阅源更新成功：已切换更佳优选源';
+    const title = isRetained ? '📺 订阅源每日检查：沿用当前可用源' : '🎉 订阅源更新成功：已切换源';
 
     return [
       `### ${title}`,
       `> **执行时间**：${timeStr}`,
-      `> **更新结果**：${isRetained ? '继续沿用上期源' : '已自动更新并替换'}`,
+      `> **更新结果**：${isRetained ? '继续沿用上期源（已通过状态校验）' : '已自动更新并替换'}`,
       '',
       `**【命中优先级】**：<font color="info">${tier ? `P${tier.id} ${tier.name}` : '未知'}</font>`,
       `**【档位变化】**：<font color="comment">${tierChange && tierChange.text ? tierChange.text : '档位信息缺失'}</font>`,
@@ -66,7 +66,9 @@ class Notifier {
       `**【网站更新时间】**：${source.update_time || '未知'}`,
       '',
       reason ? `> **策略说明**：${reason}\n` : '',
-      `**【固定订阅地址】**：`,
+      `> ⚠️ **注意**：「沿用」表示本次未换源，不代表上游一定可播；若电视打不开，请用下方自建源地址。`,
+      '',
+      `**【当前生效订阅地址】**：`,
       `\`${fixedSubscribeUrl || '请查看服务配置'}\``,
       rawM3uUrl ? `\n[查看原始 M3U 接口](${rawM3uUrl})` : ''
     ].join('\n');

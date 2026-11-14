@@ -396,6 +396,8 @@ async function selectOptimalSource(client, validator, prioritiesConfig, lastSele
         tier: lastSelectedSource.tier || { name: '上期优选源(沿用)' },
         reason: `网络异常无法确认源状态，保护性沿用上期源（${aliveCheck.error || '未知错误'}）`
       };
+    } else if (aliveCheck && aliveCheck.broken) {
+      logger(`[Selector] ❌ 上期源已损坏（${aliveCheck.error || '详情缺失'}），不再沿用，开始按优先级重新选源。`);
     } else {
       logger(`[Selector] 上次选中的源已失效 (${aliveCheck.status || '状态异常'})，开始按优先级档位重新筛选。`);
     }

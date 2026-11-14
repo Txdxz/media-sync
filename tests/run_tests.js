@@ -728,6 +728,29 @@ async function runAllTests() {
     }
   });
 
+  testCase("测试 41: 频道过滤只保留央视/卫视/凤凰并去重", () => {
+    const { isWantedChannel, dedupeKey, filterM3u } = require("../scan/channel-filter");
+    assert.strictEqual(isWantedChannel("CCTV-1"), true);
+    assert.strictEqual(isWantedChannel("CCTV5+"), true);
+    assert.strictEqual(isWantedChannel("湖南卫视"), true);
+    assert.strictEqual(isWantedChannel("凤凰卫视资讯台"), true);
+    assert.strictEqual(isWantedChannel("都市频道"), false);
+    assert.strictEqual(isWantedChannel("梨园频道"), false);
+    assert.strictEqual(dedupeKey("CCTV-1"), dedupeKey("CCTV1"));
+    assert.strictEqual(dedupeKey("湖南卫视4K"), "湖南卫视");
+    const m3u = ["#EXTM3U",
+      "#EXTINF:-1,CCTV-1","http://a/1",
+      "#EXTINF:-1,CCTV1高清","http://a/2",
+      "#EXTINF:-1,河南卫视","http://a/3",
+      "#EXTINF:-1,都市频道","http://a/4",
+      "#EXTINF:-1,凤凰卫视","http://a/5"].join("\n");
+    const r = filterM3u(m3u);
+    assert.strictEqual(r.kept, 3); // CCTV-1(去重) + 河南卫视 + 凤凰卫视
+    assert.strictEqual(r.removed, 2);
+    assert.ok(r.text.includes("CCTV-1") && r.text.includes("河南卫视") && !r.text.includes("都市频道"));
+    assert.ok(r.text.includes('group-title="央视"'));
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

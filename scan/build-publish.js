@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { loadSourceDb } = require('../src/source-db');
 const { loadProvinceDb } = require('./province-db');
+const { filterM3u } = require('./channel-filter');
 
 const ROOT = path.resolve(__dirname, '..');
 const DB = path.join(ROOT, 'data/source_db.json');
@@ -56,7 +57,11 @@ function dedupeByName(channels) {
 function build(publishDir = path.join(ROOT, 'public')) {
   const db = loadSourceDb(DB);
   const channels = dedupeByName(playableChannels(db));
-  const { text, count } = toM3u([{ channels }]);
+  const { text: rawText } = toM3u([{ channels }]);
+  // 只保留 央视 + 各省卫视 + 凤凰，并去重
+  const filtered = filterM3u(rawText);
+  const text = filtered.text;
+  const count = filtered.kept;
   if (!fs.existsSync(publishDir)) fs.mkdirSync(publishDir, { recursive: true });
 
   // 自建源同时写两个名字：

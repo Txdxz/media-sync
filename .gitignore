@@ -15,3 +15,4 @@ data/province_db.json
 data/source_db.json
 data/scan_pool.json
 data/endpoint_pool.json
+data/intel_db.json

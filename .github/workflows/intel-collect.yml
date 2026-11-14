@@ -1,0 +1,53 @@
+name: Intel Source Collect
+
+on:
+  schedule:
+    # 每天北京时间 11:00（UTC 03:00）
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      verify:
+        description: '是否抽样验证可达性'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "intel-collect"
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Aggregate intel sources
+        run: |
+          if [ "${VERIFY:-true}" = "true" ]; then node scan/intel-collect.js --verify; else node scan/intel-collect.js; fi
+        env:
+          VERIFY: ${{ inputs.verify }}
+      - name: Report summary
+        run: |
+          node -e "
+          const d=require('./data/intel_db.json');
+          console.log('groups='+d.groups.length+' channels='+d.totalChannels);
+          const v=d.groups.filter(g=>g.verified).map(g=>g.type+':'+g.verified.ok+'/'+g.verified.tested);
+          console.log('verified:', v.slice(0,20).join(' | '));
+          "
+      - name: Commit intel db
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -f data/intel_db.json ]; then
+            git add -f data/intel_db.json
+            if ! git diff --staged --quiet; then
+              git commit -m "chore(intel): update source aggregation [skip ci]"
+              git push origin main || (git pull --rebase origin main && git push origin main)
+            fi
+          fi

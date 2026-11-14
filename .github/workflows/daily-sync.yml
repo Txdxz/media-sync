@@ -69,6 +69,13 @@ jobs:
             git push origin main || (git pull --rebase origin main && git push origin main)
           fi
 
+      - name: Collect Self Sources
+        if: always()
+        run: |
+          # 采集自建源（情报聚合），失败不影响原站源发布
+          node scan/intel-collect.js || echo "::warning::情报采集失败，跳过自建源"
+          node scan/intel-to-db.js || echo "::warning::自建源库构建失败"
+
       - name: Ensure Playlist Present
         id: playlist
         env:
@@ -89,11 +96,19 @@ jobs:
             echo "has_m3u=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_m3u=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::未能获取播放列表，本次跳过 Pages 发布以保留线上版本"
+          fi
+          # 自建源兜底：即使原站源不可用，只要有自建源库也应发布
+          if [ -f ./data/source_db.json ]; then
+            echo "has_self=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_self=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "$( [ -s ./data/current.m3u ] && echo y || echo n )" = "n" ] && [ ! -f ./data/source_db.json ]; then
+            echo "::warning::既无原站源也无自建源，本次跳过 Pages 发布以保留线上版本"
           fi
 
       - name: Prepare Obfuscated Pages Artifact
-        if: steps.playlist.outputs.has_m3u == 'true'
+        if: steps.playlist.outputs.has_m3u == 'true' || steps.playlist.outputs.has_self == 'true'
         env:
           SUBSCRIBE_KEY: ${{ secrets.SUBSCRIBE_KEY }}
         run: |
@@ -110,6 +125,15 @@ jobs:
             cp ./data/state.json "./public/${CLEAN_KEY}_status.json"
           fi
 
+          # 自建源（B 线）：由情报采集的 source_db 生成，独立文件名，不依赖原站
+          # 若本地无 source_db（如首次），跳过但不影响 A 线发布
+          if [ -f "./data/source_db.json" ]; then
+            node scan/build-publish.js || echo "::warning::自建源生成失败，仅发布原站源"
+            if [ -f "./public/${CLEAN_KEY}_self.m3u" ]; then
+              echo "已生成自建源订阅: ${CLEAN_KEY}_self.m3u"
+            fi
+          fi
+
           # 部署根目录 404 伪装页面，隐藏目录列表，阻断直接扫域名
           cat << 'EOF' > ./public/index.html
           <!DOCTYPE html>
@@ -123,12 +147,12 @@ jobs:
           EOF
 
       - name: Upload GitHub Pages Artifact
-        if: steps.playlist.outputs.has_m3u == 'true'
+        if: steps.playlist.outputs.has_m3u == 'true' || steps.playlist.outputs.has_self == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
 
       - name: Deploy to GitHub Pages
-        if: steps.playlist.outputs.has_m3u == 'true'
+        if: steps.playlist.outputs.has_m3u == 'true' || steps.playlist.outputs.has_self == 'true'
         id: deployment
         uses: actions/deploy-pages@v4

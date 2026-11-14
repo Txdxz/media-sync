@@ -1,0 +1,6 @@
+{
+  "_comment": "手工探测字典：填入你要扫描的 udpxy 端点。格式 {host, port, tag}",
+  "hosts": [
+    { "host": "113.77.25.90", "port": 8188, "tag": "guangdong-dongguan" }
+  ]
+}

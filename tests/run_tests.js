@@ -674,6 +674,31 @@ async function runAllTests() {
     assert.strictEqual(stable.source.p, "p1");
   });
 
+  testCase("测试 39: 扫描模块解析 M3U 与打分", () => {
+    const { parseChannelList } = require("../scan/channels");
+    const { scoreChannels } = require("../scan/score");
+    const m3u = [
+      "#EXTM3U",
+      '#EXTINF:-1 tvg-id="CCTV1" group-title="广东惠州组播 广东电信",CCTV1HD',
+      "http://x/rtp/239.1.1.1:1000",
+      '#EXTINF:-1 tvg-id="CCTV2" group-title="广东惠州组播 广东电信",CCTV2HD',
+      "http://x/rtp/239.1.1.2:1001",
+      '#EXTINF:-1 group-title="未知",测试4K',
+      "http://x/rtp/239.1.1.3:1002"
+    ].join("\n");
+    const chs = parseChannelList(m3u, { sourceLabel: "1.2.3.4:8000" });
+    assert.strictEqual(chs.length, 3);
+    assert.strictEqual(chs[0].name, "CCTV1HD");
+    assert.strictEqual(chs[0].isHd, true);
+    assert.strictEqual(chs[2].is4K, true);
+
+    const scored = scoreChannels(chs, mockPriorities);
+    const gd = scored.find((s) => s.group.includes("惠州"));
+    assert.ok(gd);
+    assert.strictEqual(gd.tierId, 2);
+    assert.strictEqual(gd.count, 2);
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

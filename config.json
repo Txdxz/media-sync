@@ -9,7 +9,10 @@
     "candidate_delay_min_ms": 1000,
     "candidate_delay_max_ms": 2000,
     "rate_limit_retry_count": 2,
-    "rate_limit_retry_delay_ms": 5000
+    "rate_limit_retry_delay_ms": 5000,
+    "base_urls": [
+      "https://iptv.cqshushu.com"
+    ]
   },
   "server": {
     "port": 8088,

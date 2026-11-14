@@ -1,0 +1,45 @@
+name: Endpoint Scan
+
+on:
+  schedule:
+    # 每周一、四 03:00 UTC（北京时间 11:00），低频避免打扰
+    - cron: '0 3 * * 1,4'
+  workflow_dispatch:
+    inputs:
+      public_list:
+        description: '公开组播表 URL（逗号分隔，可留空只用手工字典）'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "scan"
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run scan
+        env:
+          PUBLIC_LIST: ${{ inputs.public_list }}
+        run: |
+          node scan/runner.js ${PUBLIC_LIST:+--public-list "$PUBLIC_LIST"}
+      - name: Commit scan pool
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -f data/scan_pool.json ]; then
+            git add data/scan_pool.json
+            if ! git diff --staged --quiet; then
+              git commit -m "chore(scan): update endpoint pool [skip ci]"
+              git push origin main || (git pull --rebase origin main && git push origin main)
+            fi
+          fi

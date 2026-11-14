@@ -22,7 +22,11 @@ function getRandomDelay(min, max) {
 
 class SourceClient {
   constructor(config = {}) {
-    this.baseUrl = config.base_url || 'https://iptv.cqshushu.com';
+    // 多源兜底：base_urls 依次尝试，全部失败才报错；保持 base_url 向后兼容
+    const list = Array.isArray(config.base_urls) ? config.base_urls.filter(Boolean) : [];
+    this.baseUrls = list.length ? list : [config.base_url || 'https://iptv.cqshushu.com'];
+    this.baseUrl = this.baseUrls[0];
+    this._activeBaseUrl = null;
     this.indexPath = config.index_path || '/index.php';
     this.timeoutMs = config.request_timeout_ms || 15000;
     this.userAgent = config.user_agent || 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -32,15 +36,55 @@ class SourceClient {
   }
 
   /**
-   * 发起 HTTP/HTTPS 请求
-   * 优先尝试 Node.js 原生请求，若受沙箱限制无法解析 DNS 则无缝回退至系统 curl
+   * 多源兜底请求：按 baseUrls 顺序尝试；某个源整体不可用（5xx/超时）时切换下一个
    */
   async _request(requestUrl, options = {}) {
-    const parsedUrl = new URL(requestUrl, this.baseUrl);
+    // requestUrl 若已是绝对地址（含协议），直接单次请求
+    if (/^https?:\/\//i.test(requestUrl)) {
+      return this._requestSingle(requestUrl, options);
+    }
+    if (this._activeBaseUrl) {
+      try {
+        return await this._requestSingle(requestUrl, options, this._activeBaseUrl);
+      } catch (e) {
+        if (!this._isSiteDown(e)) throw e;
+        this.logger(`[Client] ⚠️ 主源不可用（${e.message.slice(0, 60)}），尝试备用源...`);
+      }
+    }
+    let lastErr = null;
+    for (const base of this.baseUrls) {
+      try {
+        const res = await this._requestSingle(requestUrl, options, base);
+        if (this._activeBaseUrl !== base) {
+          this.logger(`[Client] ✅ 已切换使用源站: ${base}`);
+          this._activeBaseUrl = base;
+        }
+        return res;
+      } catch (e) {
+        lastErr = e;
+        this.logger(`[Client] ❌ 源站不可用 ${base}: ${e.message.slice(0, 80)}`);
+      }
+    }
+    this._activeBaseUrl = null;
+    throw lastErr || new Error('所有源站均不可用');
+  }
+
+  _isSiteDown(err) {
+    const msg = String((err && err.message) || '');
+    return /HTTP 5\d\d|timed out|ECONNREFUSED|ENOTFOUND|EAI_AGAIN|socket hang up/i.test(msg);
+  }
+
+  /**
+   * 对单个源站发起 HTTP/HTTPS 请求
+   * 优先尝试 Node.js 原生请求，若受沙箱限制无法解析 DNS 则无缝回退至系统 curl
+   */
+  async _requestSingle(requestUrl, options = {}, baseOverride = null) {
+    const base = baseOverride || this.baseUrl;
+    const parsedUrl = new URL(requestUrl, base);
     const token = generatePaerToken();
     const headers = {
       'User-Agent': this.userAgent,
-      'Referer': `${this.baseUrl}${this.indexPath}`,
+      'Referer': `${base}${this.indexPath}`,
       'Accept': options.isJson ? 'application/json, text/javascript, */*; q=0.01' : '*/*',
       'X-Requested-With': 'XMLHttpRequest',
       'X-CSRF-TOKEN': token,
@@ -153,7 +197,7 @@ class SourceClient {
       page: String(page)
     });
 
-    const targetUrl = `${this.baseUrl}${this.indexPath}?${searchParams.toString()}`;
+    const targetUrl = `${this.indexPath}?${searchParams.toString()}`;
     const maxAttempts = 1 + Math.max(0, this.rateLimitRetryCount);
     let attempts = 0;
 
@@ -276,7 +320,7 @@ class SourceClient {
    * 拉取源详情，并提取 s 参数 (带频率限制自动退避重试机制)
    */
   async fetchSourceDetail(p, t) {
-    const targetUrl = `${this.baseUrl}${this.indexPath}?p=${encodeURIComponent(p)}&t=${encodeURIComponent(t)}`;
+    const targetUrl = `${this.indexPath}?p=${encodeURIComponent(p)}&t=${encodeURIComponent(t)}`;
     const maxAttempts = 1 + Math.max(0, this.rateLimitRetryCount);
     let attempts = 0;
 
@@ -354,7 +398,7 @@ class SourceClient {
    * 直接下载指定源的完整 M3U 播放列表
    */
   async fetchM3UContent(s, t) {
-    const targetUrl = `${this.baseUrl}${this.indexPath}?s=${encodeURIComponent(s)}&t=${encodeURIComponent(t)}&channels=1&format=m3u`;
+    const targetUrl = `${this.indexPath}?s=${encodeURIComponent(s)}&t=${encodeURIComponent(t)}&channels=1&format=m3u`;
     const response = await this._request(targetUrl, { isJson: false });
     return response.body;
   }

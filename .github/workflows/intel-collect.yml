@@ -40,6 +40,8 @@ jobs:
           const v=d.groups.filter(g=>g.verified).map(g=>g.type+':'+g.verified.ok+'/'+g.verified.tested);
           console.log('verified:', v.slice(0,20).join(' | '));
           "
+      - name: Rebuild source db
+        run: node scan/intel-to-db.js
       - name: Commit intel db
         run: |
           git config --global user.name "github-actions[bot]"

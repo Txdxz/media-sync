@@ -85,12 +85,12 @@ jobs:
           KEY="${SUBSCRIBE_KEY:?SUBSCRIBE_KEY 未配置}"
           CLEAN_KEY="${KEY%.m3u}"
           PAGES_BASE="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY##*/}"
-          # 沿用日不会生成本地文件：先从线上恢复，避免发布空站点把订阅文件冲掉
-          if [ ! -s ./data/current.m3u ]; then
-            echo "本地无播放列表，尝试从线上恢复..."
-            curl -fsSL --max-time 20 --retry 2 \
-              "${PAGES_BASE}/${CLEAN_KEY}.m3u?ts=$(date +%s)" \
-              -o ./data/current.m3u || true
+          # 主文件（原站源）只由本次选源生成；沿用日不生成则跳过主文件发布（保留线上旧版），
+          # 绝不再从线上恢复——避免把自建源误当原站源发布。
+          # 安全校验：若本地主文件含自建源特征（境外其他/未分组且无组播/酒店），剔除它
+          if [ -s ./data/current.m3u ] && grep -q '境外其他\|未分组' ./data/current.m3u && ! grep -q '组播\|酒店' ./data/current.m3u; then
+            echo "::warning::主文件疑似自建源，不作为原站源发布"
+            rm -f ./data/current.m3u
           fi
           if [ -s ./data/current.m3u ]; then
             echo "has_m3u=true" >> "$GITHUB_OUTPUT"

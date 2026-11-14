@@ -1,0 +1,45 @@
+name: Live Udpxy Scan
+
+on:
+  schedule:
+    # 每周二、五 04:00 UTC（北京 12:00），低频
+    - cron: '0 4 * * 2,5'
+  workflow_dispatch:
+    inputs:
+      per_segment:
+        description: '每个 IP 段采样数'
+        required: false
+        default: '24'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "scan-live"
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Scan live udpxy
+        env:
+          PER_SEGMENT: ${{ inputs.per_segment }}
+        run: |
+          node scan/scan-live.js --per-segment ${PER_SEGMENT:-24} --concurrency 50 --timeout 2500
+      - name: Commit results
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -f data/live_endpoints.json ]; then
+            git add -f data/live_endpoints.json
+            if ! git diff --staged --quiet; then
+              git commit -m "chore(scan): live udpxy results [skip ci]"
+              git push origin main || (git pull --rebase origin main && git push origin main)
+            fi
+          fi

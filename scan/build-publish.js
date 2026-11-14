@@ -59,23 +59,19 @@ function build(publishDir = path.join(ROOT, 'public')) {
   const { text, count } = toM3u([{ channels }]);
   if (!fs.existsSync(publishDir)) fs.mkdirSync(publishDir, { recursive: true });
 
-  // 与现有发布逻辑一致：用 SUBSCRIBE_KEY 作为文件名；缺失时用固定中性名
+  // 只用 SUBSCRIBE_KEY 作为自建源文件名，绝不能覆盖原站源主文件（A 线）
   const key = (process.env.SUBSCRIBE_KEY || 'feed').replace(/\.m3u$/i, '');
-  // 原站源订阅（A 线）
-  const outFile = path.join(publishDir, `${key}.m3u`);
-  fs.writeFileSync(outFile, text, 'utf8');
-  fs.writeFileSync(path.join(publishDir, `${key}`), text, 'utf8');
-  // 自建源订阅（B 线）：不同文件名，避免覆盖 A 线
   const selfKey = `${key}_self`;
-  fs.writeFileSync(path.join(publishDir, `${selfKey}.m3u`), text, 'utf8');
-  fs.writeFileSync(path.join(publishDir, `${selfKey}`), text, 'utf8');
+  const outFile = path.join(publishDir, `${selfKey}.m3u`);
+  fs.writeFileSync(outFile, text, 'utf8');
+  fs.writeFileSync(path.join(publishDir, selfKey), text, 'utf8');
 
   // 404 伪装首页
   fs.writeFileSync(path.join(publishDir, 'index.html'),
     '<!DOCTYPE html><html><head><meta charset="utf-8"><title>404 Not Found</title></head>' +
     '<body style="font-family:sans-serif;text-align:center;padding:50px;"><h2>404 Not Found</h2></body></html>', 'utf8');
 
-  console.log(`[publish] 源库=${db.length} 可发布频道=${count} → ${outFile}`);
+  console.log(`[publish] 自建源库=${db.length} 可发布频道=${count} → ${outFile}`);
   return { count, outFile };
 }
 

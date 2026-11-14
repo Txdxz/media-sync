@@ -1,24 +1,40 @@
 {
-  "last_run_time": "2026-11-14T13:01:08.050Z",
-  "last_success_time": "2026-11-03T11:18:43.392Z",
+  "last_run_time": "2026-11-14T13:13:48.378Z",
+  "last_success_time": "2026-11-14T13:13:48.378Z",
   "consecutive_failures": 0,
   "current_source": {
-    "ip": "113.148.25.90",
-    "p": "H9HJub3bGkMS3ZIVIMC0tg",
+    "ip": "119.81.224.26",
+    "p": "Qv_kDlCGg-k6vu6tEb4dhw",
     "t": "multicast",
-    "s": "8wOpAeGQQvsUEQsu4c2LDw",
-    "type": "广东东莞组播 广东电信",
+    "s": "9kKVpIbNYwtdAl26z6yaOA",
+    "type": "广东汕尾组播 广东电信",
     "count": 344,
-    "status": "存活9天",
-    "update_time": "2026-11-03 19:17:27",
+    "status": "存活3天",
+    "update_time": "2026-11-14 21:13:12",
     "tier": {
       "id": 2,
       "name": "广东 电信 优先源",
       "province": "广东",
       "isp": "电信"
     },
-    "last_verified_at": "2026-11-14T13:01:08.050Z"
+    "last_verified_at": "2026-11-14T13:13:48.378Z"
   },
   "last_error": null,
-  "last_check_time": "2026-11-14T13:01:08.050Z"
+  "last_check_time": "2026-11-14T13:13:48.378Z",
+  "bad_sources": {
+    "A-fhTYahz0_hQ_CIlnKlGw|multicast": {
+      "ts": "2026-11-14T13:13:49.049Z",
+      "failCount": 1,
+      "ip": "14.138.54.157",
+      "type": "广东佛山组播 广东电信",
+      "reason": "抽样流探测未通过 (测试 2 个，成功 0 个，最低需要 1 个)"
+    },
+    "EL01Zlj90VHJ807CwHUeZQ|multicast": {
+      "ts": "2026-11-14T13:13:49.049Z",
+      "failCount": 1,
+      "ip": "183.54.11.44",
+      "type": "广东惠州组播 广东电信",
+      "reason": "抽样流探测未通过 (测试 2 个，成功 0 个，最低需要 1 个)"
+    }
+  }
 }

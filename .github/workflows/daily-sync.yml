@@ -119,7 +119,16 @@ jobs:
           # 自动剔除可能误填的 .m3u 后缀，避免重复拼接为 .m3u.m3u
           CLEAN_KEY="${KEY%.m3u}"
 
-          # 原站源（A 线）：存在才发布，避免原站宕机时 cp 失败阻断整条流水线
+          # 原站源（A 线）：本次没有则从线上拉回旧版一起重新部署，避免整体替换时丢文件。
+          # 只拉主文件（不含 _self），且校验必须是原站特征，防止把自建源当原站源。
+          if [ ! -s ./data/current.m3u ]; then
+            echo "本次无原站源，尝试从线上恢复旧主文件..."
+            curl -fsSL --max-time 20 "${PAGES_BASE}/${CLEAN_KEY}.m3u?ts=$(date +%s)" -o ./data/current.m3u || true
+            if [ -s ./data/current.m3u ] && grep -q '境外其他\|未分组' ./data/current.m3u && ! grep -q '组播\|酒店' ./data/current.m3u; then
+              echo "::warning::线上主文件疑似自建源，丢弃"
+              rm -f ./data/current.m3u
+            fi
+          fi
           if [ -s ./data/current.m3u ]; then
             cp ./data/current.m3u "./public/${CLEAN_KEY}.m3u"
             cp ./data/current.m3u "./public/${CLEAN_KEY}"
@@ -127,7 +136,7 @@ jobs:
               cp ./data/state.json "./public/${CLEAN_KEY}_status.json"
             fi
           else
-            echo "::warning::本次无原站源，仅发布自建源"
+            echo "::warning::既无原站源也无历史主文件，仅发布自建源"
           fi
 
           # 自建源（B 线）：由情报采集的 source_db 生成，独立文件名，不依赖原站

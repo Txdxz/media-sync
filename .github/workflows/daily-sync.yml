@@ -142,7 +142,12 @@ jobs:
           # 自建源（B 线）：由情报采集的 source_db 生成，独立文件名，不依赖原站
           # 若本地无 source_db（如首次），跳过但不影响 A 线发布
           if [ -f "./data/source_db.json" ]; then
-            node scan/build-publish.js || echo "::warning::自建源生成失败，仅发布原站源"
+            if [ -s "./data/current.m3u" ]; then
+              FILL_MAIN=0 node scan/build-publish.js || echo "::warning::自建源生成失败，仅发布原站源"
+            else
+              # 原站源缺失（源站宕机）：用自建源回填主订阅，保证电视有得更新
+              FILL_MAIN=1 node scan/build-publish.js || echo "::warning::自建源生成失败"
+            fi
             if [ -f "./public/${CLEAN_KEY}_self.m3u" ]; then
               echo "已生成自建源订阅: ${CLEAN_KEY}_self.m3u"
             fi

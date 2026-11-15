@@ -50,6 +50,13 @@ jobs:
           node scan/intel-collect.js || echo "::warning::情报采集失败，跳过自建源"
           node scan/intel-to-db.js || echo "::warning::自建源库构建失败"
 
+      - name: Collect Hotel Sources
+        if: always()
+        run: |
+          # 从 cqshushu 拉各省酒店源（源站可用时），失败不影响其他
+          node scan/hotel-collect.js || echo "::warning::酒店源采集失败"
+          node scan/hotel-to-m3u.js || echo "::warning::酒店源转换失败"
+
       - name: Run Source Selection
         env:
           QYWX_WEBHOOK_URL: ${{ secrets.QYWX_WEBHOOK_URL }}

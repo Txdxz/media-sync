@@ -781,6 +781,19 @@ async function runAllTests() {
     });
   });
 
+  testCase("测试 44: 频道标准化与排序（央视1-17→卫视→凤凰）", () => {
+    const { standardName, compareChannels, sortKey, isNonChannel } = require("../scan/channel-sort");
+    assert.strictEqual(standardName("CCTV1"), "CCTV-1 综合");
+    assert.strictEqual(standardName("CCTV-7-高清"), "CCTV-7 国防军事");
+    assert.strictEqual(standardName("CCTV5+"), "CCTV-5+ 体育赛事");
+    assert.strictEqual(standardName("BTV北京卫视"), "北京卫视");
+    assert.strictEqual(standardName("湖南卫视高清"), "湖南卫视");
+    assert.strictEqual(isNonChannel("特种兵之火凤凰"), true);
+    const list = [{ name: "凤凰卫视" }, { name: "湖南卫视" }, { name: "CCTV-13" }, { name: "CCTV-1" }, { name: "东方卫视" }];
+    list.sort(compareChannels);
+    assert.deepStrictEqual(list.map(x => x.name), ["CCTV-1", "CCTV-13", "东方卫视", "湖南卫视", "凤凰卫视"]);
+  });
+
   console.log(`\n🎉 全部 ${passedCount} 个测试用例均 100% 通过！\n`);
 }
 

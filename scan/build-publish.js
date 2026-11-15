@@ -54,14 +54,65 @@ function dedupeByName(channels) {
   return Array.from(seen.values());
 }
 
+const HOTEL_PLAYLIST = path.join(ROOT, 'data/hotel_playlist.json');
+
+function loadHotelChannels() {
+  try {
+    const d = JSON.parse(fs.readFileSync(HOTEL_PLAYLIST, 'utf8'));
+    return d.channels || [];
+  } catch (e) { return []; }
+}
+
 function build(publishDir = path.join(ROOT, 'public')) {
+  const { standardName, compareChannels, isNonChannel } = require('./channel-sort');
+
+  // 1) 收集候选频道：酒店源(优先) + 自建源，各自先过"央视/卫视/凤凰"过滤
+  const hotel = loadHotelChannels();
   const db = loadSourceDb(DB);
-  const channels = dedupeByName(playableChannels(db));
-  const { text: rawText } = toM3u([{ channels }]);
-  // 只保留 央视 + 各省卫视 + 凤凰，并去重
-  const filtered = filterM3u(rawText);
-  const text = filtered.text;
-  const count = filtered.kept;
+  const baseChannels = dedupeByName(playableChannels(db));
+  const { text: baseRaw } = toM3u([{ channels: baseChannels }]);
+  const baseFiltered = filterM3u(baseRaw);
+
+  // 解析成 {name, inf, url} 列表
+  function parseM3u(text) {
+    const out = [];
+    const lines = text.split('\n');
+    let inf = null;
+    for (const line of lines) {
+      if (line.startsWith('#EXTINF')) { inf = line; continue; }
+      if (!line || line.startsWith('#')) continue;
+      if (!inf) continue;
+      const name = inf.slice(inf.lastIndexOf(',') + 1).trim();
+      out.push({ name, inf, url: line });
+      inf = null;
+    }
+    return out;
+  }
+
+  const candidates = [...hotel, ...parseM3u(baseFiltered.text)];
+
+  // 2) 标准化频道名 + 按标准名去重（酒店源在前，优先保留）
+  const seen = new Set();
+  const finalChannels = [];
+  for (const ch of candidates) {
+    if (isNonChannel(ch.name)) continue;
+    const std = standardName(ch.name);
+    const key = std.replace(/\s+/g, '');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    // 重写 EXTINF 的频道名称为标准名
+    const newInf = ch.inf.replace(/,([^,]*)$/, `,${std}`);
+    finalChannels.push({ name: std, inf: newInf, url: ch.url });
+  }
+
+  // 3) 排序：央视1..17 → 卫视 → 凤凰
+  finalChannels.sort(compareChannels);
+
+  // 4) 输出
+  const m3uLines = ['#EXTM3U x-tvg-url="https://live.fanmingming.com/e.xml"'];
+  for (const ch of finalChannels) { m3uLines.push(ch.inf, ch.url); }
+  const text = m3uLines.join('\n');
+  const count = finalChannels.length;
   if (!fs.existsSync(publishDir)) fs.mkdirSync(publishDir, { recursive: true });
 
   // 自建源同时写两个名字：

@@ -17,3 +17,5 @@ data/scan_pool.json
 data/endpoint_pool.json
 data/intel_db.json
 data/csv_probe.json
+data/hotel_db.json
+data/hotel_playlist.json

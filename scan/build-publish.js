@@ -115,21 +115,12 @@ function build(publishDir = path.join(ROOT, 'public')) {
   const count = finalChannels.length;
   if (!fs.existsSync(publishDir)) fs.mkdirSync(publishDir, { recursive: true });
 
-  // 自建源同时写两个名字：
-  //  - ${key}.m3u      主订阅地址（原站长期宕机时作为兜底，内容=自建源）
-  //  - ${key}_self.m3u 明确的自建源地址
-  // 说明：主文件是否用自建源覆盖，由 workflow 决定；这里只负责生成文件。
+  // 自建源只写 _self 文件（备用），绝不写主文件——主订阅始终以 cqshushu 为主。
   const key = (process.env.SUBSCRIBE_KEY || 'feed').replace(/\.m3u$/i, '');
   const selfKey = `${key}_self`;
   const outFile = path.join(publishDir, `${selfKey}.m3u`);
   fs.writeFileSync(outFile, text, 'utf8');
   fs.writeFileSync(path.join(publishDir, selfKey), text, 'utf8');
-  // 若显式要求回填主文件（origin 长期宕机时）
-  if (process.env.FILL_MAIN === '1') {
-    fs.writeFileSync(path.join(publishDir, `${key}.m3u`), text, 'utf8');
-    fs.writeFileSync(path.join(publishDir, `${key}`), text, 'utf8');
-    console.log('[publish] 已回填主订阅文件（FILL_MAIN=1）');
-  }
 
   // 404 伪装首页
   fs.writeFileSync(path.join(publishDir, 'index.html'),

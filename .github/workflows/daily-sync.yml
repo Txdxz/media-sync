@@ -126,13 +126,17 @@ jobs:
           # 自动剔除可能误填的 .m3u 后缀，避免重复拼接为 .m3u.m3u
           CLEAN_KEY="${KEY%.m3u}"
 
-          # 原站源（A 线）：本次没有则从线上拉回旧版一起重新部署，避免整体替换时丢文件。
-          # 只拉主文件（不含 _self），且校验必须是原站特征，防止把自建源当原站源。
+          # 主订阅一律只放 cqshushu 原站源（以它为主）。
+          # cqshushu 可用：本次选源会生成 current.m3u → 发布为主文件。
+          # cqshushu 挂：本次无 current.m3u → 保留线上现有主文件（不覆盖、不拿自建源顶替）。
+          # 若本次无原站源，从线上拉回上次的主文件（仅当它真的是 cqshushu 原站源才用）
           if [ ! -s ./data/current.m3u ]; then
-            echo "本次无原站源，尝试从线上恢复旧主文件..."
+            echo "本次无 cqshushu 源，尝试恢复线上旧主文件..."
             curl -fsSL --max-time 20 "${PAGES_BASE}/${CLEAN_KEY}.m3u?ts=$(date +%s)" -o ./data/current.m3u || true
-            if [ -s ./data/current.m3u ] && grep -q '境外其他\|未分组' ./data/current.m3u && ! grep -q '组播\|酒店' ./data/current.m3u; then
-              echo "::warning::线上主文件疑似自建源，丢弃"
+            if [ -s ./data/current.m3u ] && ! grep -qE 'group-title="(央视|卫视|凤凰)"' ./data/current.m3u && grep -qE 'group-title="[^"]*(组播|酒店|电信|联通|移动)' ./data/current.m3u; then
+              echo "旧主文件为 cqshushu 原站源，保留"
+            else
+              echo "::warning::线上旧主文件非原站源或为空，丢弃（避免自建源顶替主订阅）"
               rm -f ./data/current.m3u
             fi
           fi
@@ -142,21 +146,16 @@ jobs:
             if [ -f "./data/state.json" ]; then
               cp ./data/state.json "./public/${CLEAN_KEY}_status.json"
             fi
+            echo "已发布 cqshushu 原站源为主订阅"
           else
-            echo "::warning::既无原站源也无历史主文件，仅发布自建源"
+            echo "::warning::本次无 cqshushu 源，主订阅保持线上旧版（自建源仅作备用 _self）"
           fi
 
-          # 自建源（B 线）：由情报采集的 source_db 生成，独立文件名，不依赖原站
-          # 若本地无 source_db（如首次），跳过但不影响 A 线发布
+          # 自建源（备用）：只发布 _self 文件，绝不回填主文件
           if [ -f "./data/source_db.json" ]; then
-            if [ -s "./data/current.m3u" ]; then
-              FILL_MAIN=0 node scan/build-publish.js || echo "::warning::自建源生成失败，仅发布原站源"
-            else
-              # 原站源缺失（源站宕机）：用自建源回填主订阅，保证电视有得更新
-              FILL_MAIN=1 node scan/build-publish.js || echo "::warning::自建源生成失败"
-            fi
+            FILL_MAIN=0 node scan/build-publish.js || echo "::warning::自建源生成失败"
             if [ -f "./public/${CLEAN_KEY}_self.m3u" ]; then
-              echo "已生成自建源订阅: ${CLEAN_KEY}_self.m3u"
+              echo "已生成备用自建源: ${CLEAN_KEY}_self.m3u"
             fi
           fi
 

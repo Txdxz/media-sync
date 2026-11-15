@@ -12,11 +12,13 @@ const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'data/csv_probe.json');
 
 async function probeOne(row, timeoutMs) {
-  // 先试 /status 判断 udpxy
+  // 阶段1：单请求快速筛（/status），非 udpxy 直接判死
   const s = await request(`${row.link}/status`, { timeoutMs, maxBytes: 8192 });
+  if (!s.ok || s.status !== 200) return { ...row, alive: false, error: s.error || `http_${s.status}` };
   const stxt = (s.body || Buffer.alloc(0)).toString('utf8');
-  const isU = s.ok && s.status === 200 && /udpxy|Multicast|clients=/i.test(stxt);
-  // 再试频道表
+  const isU = /udpxy|Multicast|clients=/i.test(stxt);
+  if (!isU) return { ...row, alive: false, error: 'not_udpxy' };
+  // 阶段2：仅对活的 udpxy 抓频道表
   let channels = [];
   for (const p of ['/channels', '/list.m3u', '/rtp.m3u', '/']) {
     const r = await request(`${row.link}${p}`, { timeoutMs, maxBytes: 1024 * 1024 });
@@ -27,7 +29,7 @@ async function probeOne(row, timeoutMs) {
       if (channels.length) break;
     }
   }
-  return { ...row, alive: isU || channels.length > 0, udpxy: isU, channelCount: channels.length, sample: channels.slice(0, 2) };
+  return { ...row, alive: true, udpxy: isU, channelCount: channels.length, sample: channels.slice(0, 3) };
 }
 
 (async () => {
@@ -39,13 +41,13 @@ async function probeOne(row, timeoutMs) {
     while (idx < rows.length) {
       const row = rows[idx++];
       try {
-        const r = await probeOne(row, 4000);
+        const r = await probeOne(row, 2500);
         if (r.alive) { alive++; console.log(`✅ ${row.province||'?'} ${row.city||''} ${row.ip}:${row.port} ch=${r.channelCount} udpxy=${r.udpxy}`); }
         results.push(r);
       } catch (e) { results.push({ ...row, alive: false, error: e.message }); }
     }
   }
-  await Promise.all(Array.from({ length: 25 }, worker));
+  await Promise.all(Array.from({ length: 50 }, worker));
   fs.writeFileSync(OUT, JSON.stringify({ updatedAt: new Date().toISOString(), total: results.length, alive, results }, null, 2));
   console.log(`[csv-probe] 存活 ${alive}/${results.length}, 写入 ${OUT}`);
 })().catch(e => { console.error('[csv-probe] 失败:', e.message); process.exit(1); });

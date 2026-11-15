@@ -1,6 +1,6 @@
 {
-  "last_run_time": "2026-11-15T04:32:42.520Z",
-  "last_success_time": "2026-11-15T04:32:42.520Z",
+  "last_run_time": "2026-11-15T16:06:28.966Z",
+  "last_success_time": "2026-11-15T16:06:28.966Z",
   "consecutive_failures": 0,
   "current_source": {
     "ip": "119.81.224.26",
@@ -17,10 +17,10 @@
       "province": "广东",
       "isp": "电信"
     },
-    "last_verified_at": "2026-11-15T04:32:42.520Z"
+    "last_verified_at": "2026-11-15T16:06:28.966Z"
   },
   "last_error": null,
-  "last_check_time": "2026-11-15T04:32:42.520Z",
+  "last_check_time": "2026-11-15T16:06:28.966Z",
   "bad_sources": {
     "A-fhTYahz0_hQ_CIlnKlGw|multicast": {
       "ts": "2026-11-14T13:13:49.049Z",

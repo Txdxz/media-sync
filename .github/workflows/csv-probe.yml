@@ -1,0 +1,46 @@
+name: CSV Source Probe
+
+on:
+  schedule:
+    # 每天北京时间 12:00（UTC 04:00）
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "csv-probe"
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Probe CSV endpoints
+        run: node scan/csv-probe.js
+      - name: Summary
+        run: |
+          node -e "
+          const d=require('./data/csv_probe.json');
+          console.log('alive='+d.alive+'/'+d.total);
+          const byProv={};
+          for(const r of d.results.filter(x=>x.alive)){ byProv[r.province||'?']=(byProv[r.province||'?']||0)+1; }
+          console.log('alive-by-province:', JSON.stringify(byProv));
+          "
+      - name: Commit probe
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -f data/csv_probe.json ]; then
+            git add -f data/csv_probe.json
+            if ! git diff --staged --quiet; then
+              git commit -m "chore(csv-probe): update [skip ci]"
+              git push origin main || (git pull --rebase origin main && git push origin main)
+            fi
+          fi

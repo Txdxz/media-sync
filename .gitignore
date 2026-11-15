@@ -16,3 +16,4 @@ data/source_db.json
 data/scan_pool.json
 data/endpoint_pool.json
 data/intel_db.json
+data/csv_probe.json

@@ -310,6 +310,26 @@ class SyncScheduler {
           tier: result.tier
         });
 
+        // 沿用也属于 cqshushu 源：重新拉一次 M3U 写盘，保证主订阅文件存在且为原站源
+        try {
+          if (result.source && result.source.s) {
+            const m3u = await this.client.fetchM3UContent(result.source.s, result.source.t);
+            const v = await this.validator.validate(m3u, { sourceIp: result.source.ip, sourceName: result.source.type });
+            if (v.isValid) {
+              this.storage.atomicUpdateM3u(v.normalizedM3u, {
+                ip: result.source.ip, p: result.source.p, t: result.source.t, s: result.source.s,
+                type: result.source.type, count: v.channelCount, status: result.source.status,
+                update_time: result.source.update_time, tier: result.tier
+              });
+              console.log(`✅ 沿用源 M3U 已写盘（${v.channelCount} 频道），主订阅以 cqshushu 为准`);
+            } else {
+              console.warn(`沿用源 M3U 校验未通过: ${v.reason}`);
+            }
+          }
+        } catch (e) {
+          console.warn(`沿用源写盘失败（不影响状态记录）: ${e.message.slice(0, 80)}`);
+        }
+
         // 发送通知（若配置）
         if (this.notifier.shouldNotify({ type: 'success', isRetained: true })) {
           await this.notifier.notifySuccess({

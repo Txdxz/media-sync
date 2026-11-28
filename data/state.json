@@ -1,5 +1,5 @@
 {
-  "last_run_time": "2026-11-27T18:43:18.341Z",
+  "last_run_time": "2026-11-28T17:24:44.544Z",
   "last_success_time": "2026-11-26T18:52:27.848Z",
   "consecutive_failures": 0,
   "current_source": {
@@ -9,7 +9,7 @@
     "s": "vHxbIBSrtxKjOSHKWwS9-Q",
     "type": "广东东莞组播 广东电信",
     "count": 344,
-    "status": "存活4天",
+    "status": "存活5天",
     "update_time": "2026-11-27 02:09:00",
     "tier": {
       "id": 2,
@@ -17,10 +17,10 @@
       "province": "广东",
       "isp": "电信"
     },
-    "last_verified_at": "2026-11-27T18:43:18.341Z"
+    "last_verified_at": "2026-11-28T17:24:44.544Z"
   },
   "last_error": null,
-  "last_check_time": "2026-11-27T18:43:18.341Z",
+  "last_check_time": "2026-11-28T17:24:44.544Z",
   "bad_sources": {
     "9Xyyj5pz05cdJosctEQxnA|multicast": {
       "ts": "2026-11-26T18:52:28.714Z",
